@@ -4,6 +4,13 @@
 the backend api containing all http endpoints to the front end application.
 Use `python manage.py runserver` to start development enviornment. 
 
+**end-points:**
+- `http://127.0.0.1:8000` : Home
+- `http://127.0.0.1:8000/admin` : Admin/Superuser panel to access data
+- `http://127.0.0.1:8000/auth/signup` : Send *POST* requests here to create new Users
+- `http://127.0.0.1:8000/auth/login` : Send *POST* request consisting of (username, login) to reciever auth token
+- `http://127.0.0.1:8000/auth/loginData` : Send *POST* request here containg email or phone number to recieve username back.
+
 ---
 
 ## Project Details
