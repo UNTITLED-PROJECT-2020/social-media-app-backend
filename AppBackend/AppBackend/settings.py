@@ -20,7 +20,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'sj8-mwm77q(%=9lrmc6zw6lz8b=orl^@l=wvc17e*z#-cn%9ob'
+SECRET_KEY = '^*qn(o5@+ho2pgxb=z!rxs$qq84$5bzqrp^)z^v08wq0c_^3qg'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -39,7 +39,19 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # added
     'rest_framework',
+    'authentication',
+    'rest_framework.authtoken'
 ]
+
+# setting token auth
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
+
+# setting custom user
+AUTH_USER_MODEL = 'authentication.Account'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -49,7 +61,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # added
 ]
 
 ROOT_URLCONF = 'AppBackend.urls'
