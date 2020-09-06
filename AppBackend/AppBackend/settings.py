@@ -39,8 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # added
     'rest_framework',
-    'authentication',
     'rest_framework.authtoken'
+    'authentication',
+    'chat'
 ]
 
 # setting token auth

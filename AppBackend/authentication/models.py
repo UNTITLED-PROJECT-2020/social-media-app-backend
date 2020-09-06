@@ -50,8 +50,8 @@ class Account(AbstractBaseUser):  # creating custom/abstract user
     REQUIRED_FIELDS = ('ph_num', 'email')
     USERNAME_FIELD = 'username'
 
-    f_name = models.CharField(max_length=100)
-    l_name = models.CharField(max_length=100)
+    # f_name = models.CharField(max_length=100)
+    # l_name = models.CharField(max_length=100)
     username = models.CharField(max_length=10, unique=True)
     password = models.CharField(max_length=100)
     email = models.EmailField(max_length=100, unique=True)
