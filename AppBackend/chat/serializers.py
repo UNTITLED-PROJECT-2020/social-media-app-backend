@@ -1,5 +1,5 @@
 # imports
-from .models import Account
+# from .models import Account
 # rest framework imports
 from rest_framework import serializers
 

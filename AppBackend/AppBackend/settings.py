@@ -39,9 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # added
     'rest_framework',
-    'rest_framework.authtoken'
+    'rest_framework.authtoken',
     'authentication',
-    'chat'
+    'chat',
+    'channels',
 ]
 
 # setting token auth
@@ -53,6 +54,10 @@ REST_FRAMEWORK = {
 
 # setting custom user
 AUTH_USER_MODEL = 'authentication.Account'
+
+# setting ASGI application i.e. Channels messaging
+
+ASGI_APPLICATION = 'AppBackend.routing.application'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

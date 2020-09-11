@@ -14,7 +14,7 @@ from rest_framework import viewsets
 # Create your views here.
 
 
-class GenericLoginViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin):
+class GenericLoginViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin, mixins.CreateModelMixin):
     # return username if login with any other field (i.e. : phone number, email)
     serializer_class = AccountSerializer
     queryset = Account.objects.all()
