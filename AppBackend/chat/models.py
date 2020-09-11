@@ -18,7 +18,7 @@ class Message(models.Model):
     is_read = models.BooleanFeild(default=False)
 
     def __str__(self):
-         return self.message
+        return self.message
 
-     class Meta:
-         ordering = ('timestamp',)
+    class Meta:
+        ordering = ('timestamp',)

@@ -16,6 +16,7 @@ class GenericMessageViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mi
     def create(self, req):  # post method
         data = {}  # creating data dictionary to send as response
         if req.data:
+            print("nothing yet")
 
         else:
             data["error"] = "no data provided"
