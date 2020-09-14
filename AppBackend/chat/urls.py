@@ -1,6 +1,6 @@
 # imports
 from . import views
-from django.urls import include, path
+from django.urls import include, path, re_path
 # rest framework imports
 from rest_framework.routers import DefaultRouter
 
@@ -11,4 +11,7 @@ app_name = 'chat'
 authRouter = DefaultRouter()
 
 # urls
-urlpatterns = []
+urlpatterns = [
+    path('', views.index, name="index"),
+    path('<str:room_name>/', views.room, name="room"),
+]

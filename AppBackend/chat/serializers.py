@@ -1,18 +1,14 @@
 # imports
-# from .models import Account
+from .models import Message
+from . import models
 # rest framework imports
 from rest_framework import serializers
 
 # creating serializers for models to work with
 
 
-class AccountSerializer(serializers.ModelSerializer):
+class MessageSerializer(serializers.ModelSerializer):
 
     class Meta:
-        # model = Chat
-        # fields = ['id', 'f_name', 'l_name',
-        #           'email', 'ph_num', 'password', 'date']
-        fields = ['email', 'username', 'password', 'ph_num']
-        extra_kwargs = {
-            'password': {'write_only': True}
-        }
+        model = models.Message
+        fields = ['sender', 'reciever', 'message']

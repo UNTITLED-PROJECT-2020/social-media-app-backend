@@ -1,19 +1,13 @@
 # imports
-from channels.routing import ProtocolTypeRouter
+from channels.auth import AuthMiddlewareStack
+from channels.routing import ProtocolTypeRouter, URLRouter
+import chat.routing
 
-# routing or application to use channels server for messaging
 application = ProtocolTypeRouter({
-    # (http -> django views is added by default)
-
-    # # WebSocket chat handler
-
-    # "websocket": AuthMiddlewareStack(
-    #     URLRouter([
-    #         url(r"^chat/admin/$", AdminChatConsumer),
-    #         url(r"^chat/$", PublicChatConsumer),
-    #     ])
-    # ),
-
-    # # Using the third-party project frequensgi, which provides an APRS protocol
-    # "aprs": APRSNewsConsumer,
+    # (http->django views is added by default)
+    'websocket': AuthMiddlewareStack(
+        URLRouter(
+            chat.routing.websocket_urlpatterns
+        )
+    ),
 })

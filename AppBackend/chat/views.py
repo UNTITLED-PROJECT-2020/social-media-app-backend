@@ -1,4 +1,5 @@
 # imports
+from django.shortcuts import render
 import json
 from django.utils.safestring import mark_safe
 # rest framework imports
@@ -21,3 +22,14 @@ class GenericMessageViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mi
         else:
             data["error"] = "no data provided"
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+
+# testing urls
+def index(request):
+    return render(request, 'testing/index.html', {})
+
+
+def room(request, room_name):
+    return render(request, 'testing/room.html', {
+        'room_name': room_name
+    })
