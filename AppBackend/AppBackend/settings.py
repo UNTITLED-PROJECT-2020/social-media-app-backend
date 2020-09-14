@@ -39,8 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # added
     'rest_framework',
+    'rest_framework.authtoken',
     'authentication',
-    'rest_framework.authtoken'
+    'chat',
+    'home',
+    'channels',
 ]
 
 # setting token auth
@@ -52,6 +55,17 @@ REST_FRAMEWORK = {
 
 # setting custom user
 AUTH_USER_MODEL = 'authentication.Account'
+
+# setting ASGI application i.e. Channels messaging
+ASGI_APPLICATION = 'AppBackend.routing.application'
+
+# setting up in-memory channel layers
+# FIXME (Convert this to redis server)
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
