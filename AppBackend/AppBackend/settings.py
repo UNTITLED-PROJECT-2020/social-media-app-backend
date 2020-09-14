@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'authentication',
     'chat',
     'home',
+    'profileDetails',
     'channels',
 ]
 
