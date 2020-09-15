@@ -64,7 +64,7 @@ class GenericSignupViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
             # appending information to data dictionary JSON
             data['response'] = "success"
             data['data'] = serializer.data
-            data['token'] = str('Token ') + str(token)
+            data['token'] = str(token)
 
             statusCode = status.HTTP_201_CREATED  # creating http code
 
