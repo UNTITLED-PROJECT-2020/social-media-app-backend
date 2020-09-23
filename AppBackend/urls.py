@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('auth/', include('authentication.urls', namespace='authentication')),
     path('chat/', include('chat.urls', namespace='chat')),
+    path('profile/', include('profileDetails.urls', namespace='profile')),
 ]
