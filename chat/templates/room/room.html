@@ -17,14 +17,17 @@
         const chatSocket = new WebSocket(
             'ws://' +
             window.location.host +
-            '/ws/chat/' +
+            '/ws/chat/room/' +
             roomName +
             '/'
         );
 
         chatSocket.onmessage = function (e) {
             const data = JSON.parse(e.data);
-            document.querySelector('#chat-log').value += (data.message + '\n');
+
+            if (data.command == 'receive_msg') { // put condition for type of data received on data.command
+                document.querySelector('#chat-log').value += (data.message + '\n');
+            }
         };
 
         chatSocket.onclose = function (e) {
@@ -41,9 +44,13 @@
         document.querySelector('#chat-message-submit').onclick = function (e) {
             const messageInputDom = document.querySelector('#chat-message-input');
             const message = messageInputDom.value;
+
+            // sending data
             chatSocket.send(JSON.stringify({
-                'message': message
+                'message': message,
+                'command': 'fetch_messages'
             }));
+
             messageInputDom.value = '';
         };
     </script>

@@ -1,0 +1,39 @@
+<!-- chat/templates/chat/index.html -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Personal Chat Rooms</title>
+</head>
+
+<body>
+    Who are you and who would you like to write to?<br>
+    <input id="sender-num-input" type="text" size="100"><br>
+    <input id="receiver-num-input" type="text" size="100"><br>
+    <input id="room-name-submit" type="button" value="Enter">
+
+    <script>
+        document.querySelector('#sender-num-input').focus();
+        document.querySelector('#sender-num-input').onkeyup = function (e) {
+            if (e.keyCode === 13) { // enter, return
+                document.querySelector('#receiver-num-input').focus();
+            }
+        };
+
+        document.querySelector('#receiver-num-input').onkeyup = function (e) {
+            if (e.keyCode === 13) { // enter, return
+                document.querySelector('#room-name-submit').click();
+            }
+        };
+
+        document.querySelector('#room-name-submit').onclick = function (e) {
+            var msg_from = document.querySelector('#sender-num-input').value;
+            var msg_to = document.querySelector('#receiver-num-input').value;
+            console.log(`msg_from : ${msg_from}, msg_to : ${msg_to}`);
+            window.location.pathname = '/chat/personal/' + msg_from + '/' + msg_to + '/';
+        };
+    </script>
+</body>
+
+</html>

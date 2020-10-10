@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Chat Room</title>
+</head>
+
+<body>
+    <textarea id="chat-log" cols="100" rows="20"></textarea><br>
+    <input id="chat-message-input" type="text" size="100"><br>
+    <input id="chat-message-submit" type="button" value="Send"><br><br>
+    <textarea id="seen-log" cols="60" rows="2"></textarea><br>
+
+    <br><br><br>
+    <h1>this chat is for contact : {{msg_from}}</h1>
+
+    {{ msg_from | json_script:"msg_from" }}
+    {{ msg_to | json_script:"msg_to" }}
+
+    <script>
+        const msg_from = JSON.parse(document.getElementById('msg_from').textContent);
+        const msg_to = JSON.parse(document.getElementById('msg_to').textContent);
+
+        console.log(`msg_from : ${msg_from}, msg_to : ${msg_to}`);
+
+        const chatReceiveSocket = new WebSocket(
+            'ws://' +
+            window.location.host +
+            '/ws/chat/special/' +
+            msg_from + '/'
+        );
+
+        const chatSendSocket = new WebSocket(
+            'ws://' +
+            window.location.host +
+            '/ws/chat/personal/' +
+            msg_from + '/' + msg_to + '/'
+        );
+
+        //==================//
+        // Websocket Functions
+        //==================//
+
+        chatReceiveSocket.onopen = function (e) {
+            console.log(`chat socket opened at ${chatReceiveSocket.url}`);
+        }
+
+        chatReceiveSocket.onerror = function (e) {
+            console.log("error occured : ");
+            console.log(e);
+        }
+
+        chatReceiveSocket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+
+            console.log(data);
+
+            // put condition for type of data received on data.command
+            if (data['command'] == 'receive_msg') {
+                console.log(`msg received, responce : ${e.data}`);
+                document.querySelector('#chat-log').value += ('\t\t' + data.message + ` [from: ${data.msg_from}]` +
+                    '\n' + `\t\t\t   [received at : ${data['sent_timestamp']}]\n\n`);
+
+                // creating timestamp
+                function addZero(x, n) {
+                    while (x.toString().length < n) {
+                        x = "0" + x;
+                    }
+                    return x;
+                }
+
+                var currentdate = new Date();
+                var datetime = currentdate.getFullYear() + "-" +
+                    addZero(currentdate.getMonth() + 1, 2) + "-" +
+                    addZero(currentdate.getDate(), 2) + " " +
+                    addZero(currentdate.getHours(), 2) + ":" +
+                    addZero(currentdate.getMinutes(), 2) + ":" +
+                    addZero(currentdate.getSeconds(), 2) + "." +
+                    currentdate.getMilliseconds();
+
+                // sending 'seen' responce
+                chatSendSocket.send(JSON.stringify({
+                    'message': 'none',
+                    'msg_from': msg_from,
+                    'msg_to': msg_to,
+                    'command': 'msg_read',
+                    'sent_timestamp': datetime,
+                }));
+
+            } else if (data['command'] == 'msg_read') {
+                document.querySelector('#seen-log').value = (`last message seen at ${data['sent_timestamp']}`);
+            }
+        };
+
+        chatReceiveSocket.onclose = function (e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        //==================//
+        // Dialog Box Functions
+        //==================//
+
+        document.querySelector('#chat-message-input').focus();
+        document.querySelector('#chat-message-input').onkeyup = function (e) {
+            if (e.keyCode === 13) { // enter, return
+                document.querySelector('#chat-message-submit').click();
+            }
+        };
+
+        document.querySelector('#chat-message-submit').onclick = function (e) {
+            const messageInputDom = document.querySelector('#chat-message-input');
+            const message = messageInputDom.value;
+
+            // creating timestamp
+            function addZero(x, n) {
+                while (x.toString().length < n) {
+                    x = "0" + x;
+                }
+                return x;
+            }
+
+            var currentdate = new Date();
+            var datetime = currentdate.getFullYear() + "-" +
+                addZero(currentdate.getMonth() + 1, 2) + "-" +
+                addZero(currentdate.getDate(), 2) + " " +
+                addZero(currentdate.getHours(), 2) + ":" +
+                addZero(currentdate.getMinutes(), 2) + ":" +
+                addZero(currentdate.getSeconds(), 2); +
+            "." + currentdate.getMilliseconds();
+
+            console.log(datetime);
+
+            // sending data
+            chatSendSocket.send(JSON.stringify({
+                'message': message,
+                'command': 'new_msg',
+                'msg_from': msg_from,
+                'msg_to': msg_to,
+                'sent_timestamp': datetime,
+            }));
+
+            chatSendSocket.onmessage = function (e) {
+                if (JSON.parse(e.data)['command'] == "msg_sent") {
+                    document.querySelector('#chat-log').value += (
+                        `   [sent at : ${JSON.parse(e.data)['sent_timestamp']}]\n\n`);
+                } else {
+                    console.log(`msg responce : \n ${e.data}`);
+                    console.log(e);
+                }
+
+            }
+
+            document.querySelector('#chat-log').value += (message + '\n');
+
+            messageInputDom.value = '';
+        };
+    </script>
+</body>
+
+</html>
