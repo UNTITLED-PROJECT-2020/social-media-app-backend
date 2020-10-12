@@ -8,4 +8,4 @@ class AccountDetailSerializer(serializers.ModelSerializer):
     #account key commented out for now
     class Meta:
         model = AccountDetail
-        fields=['id','fname','lname','bio','score','created','Account']
+        fields=['id','fname','lname','bio','score','created','Account_foreignkey']
