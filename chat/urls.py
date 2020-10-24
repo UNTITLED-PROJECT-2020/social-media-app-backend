@@ -18,6 +18,10 @@ urlpatterns = [
     path('personal/', views.personalIndex, name="Personal Index"),
     path('personal/<str:msg_from>/<str:msg_to>/',
          views.personalRoom, name="Personal Chat Room"),
+    # testing
+    path('personal/test', views.personalIndexTest, name="Personal Index"),
+    path('personal/test/<str:msg_from>/<str:msg_to>/',
+         views.personalRoomTest, name="Personal Chat Room"),
 
     ##################################################
     ######## urls for Group Chats #############

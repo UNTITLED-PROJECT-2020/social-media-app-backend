@@ -38,6 +38,18 @@ def personalRoom(request, msg_from, msg_to):
         'msg_from': msg_from,
         'msg_to': msg_to,
     })
+# test
+
+
+def personalIndexTest(request):
+    return render(request, 'personal/testing/index.html', {})
+
+
+def personalRoomTest(request, msg_from, msg_to):
+    return render(request, 'personal/testing/room.html', {
+        'msg_from': msg_from,
+        'msg_to': msg_to,
+    })
 
 ##################################################
 ######## views for Group Chats #############
@@ -56,6 +68,8 @@ def chatRoom(request, room_name):
     return render(request, 'room/room.html', {
         'room_name': room_name
     })
+
+# test
 
 ##################################################
 ######## views for Special Chats #############

@@ -3,7 +3,8 @@ import json
 import datetime
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from .models import Message
+from .models import Message, Dialogue, ActiveDetail
+from django.conf import settings
 from .serializers import MessageSerializer
 # rest framework
 from .serializers import MessageSerializer
@@ -12,16 +13,18 @@ from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 
+Account = settings.AUTH_USER_MODEL
+
 # command dictionary
 commands = {
     # message based
-    'new_user',
     'new_msg',
+    'msg_sent',
+    'new_user',
     'new_grp_msg',
     'new_room_msg'
     'img',
     # time based
-    'msg_sent',
     'msg_received',
     'msg_read',
     'is_typing',
@@ -43,11 +46,10 @@ Account = get_user_model()
 
 class ChatPersonalConsumer(WebsocketConsumer):
     def connect(self):
-        # getting aguements
-        msg_from = self.scope['url_route']['kwargs']['msg_from']
+        # getting aguements (the phone numbers in string format)
         msg_to = self.scope['url_route']['kwargs']['msg_to']
 
-        # self.channel_name = msg_from
+        # setting the group name to the phone number of the receiver
         self.room_group_name = msg_to
 
         # Join room group
@@ -86,58 +88,82 @@ class ChatPersonalConsumer(WebsocketConsumer):
     def new_msg(self, event):
         print("2")
 
-        message = event['message']
-        # print(json.dumps(event, indent=2))
-
-        # Send message to WebSocket
-        self.send(text_data=json.dumps({
-            'msg_from': event['msg_from'],
-            'msg_to': event['msg_to'],
-            'command': 'msg_sent',
-            'sent_timestamp': event['sent_timestamp'],
-        }))
-
-    # send response that the message was received by the receiver
-    def msg_recevied(self, event):
-        # TODO : (save/update last_seen_timestamp)
-
-        command = event['type']
+        # quering Account table and creating variables
+        sender_pk = Account.objects.filter(ph_num=event['msg_from'])[0]
+        receiver_pk = Account.objects.filter(ph_num=event['msg_to'])[0]
         msg_from = event['msg_from']
-        msg_to = event['msg_to']
+        sent_timestamp = event['sent_timestamp'],
+
+        # editing serializer input data
+        serializerData = event
+        serializerData['command'] = 'msg_sent'
+        serializerData['dialogue'] = Dialogue.objects.filter(
+            sender=sender_pk, receiver=receiver_pk)[0].pk
+        print(sent_timestamp)
+        serializerData['sent_timestamp'] = sent_timestamp[0]
+
+        # print(serializerData)
+
+        # saving serilizer data
+        serializer = MessageSerializer(data=serializerData)
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            print("serializer error occured in 'new_msg'")
+            print(serializer.errors)
+
+        # editing serializer data for sending
+        serializerData = serializer.validated_data
+        # print(serializerData)
+
+        serializerData['sent_timestamp'] = sent_timestamp
+        serializerData.pop('dialogue')
+
+        # sending data back to sender
+        self.send(text_data=json.dumps(serializerData))
+
+    def msg_received(self, event):
+        # TODO : (save/update last_received_receiver)
+        sender_pk = Account.objects.filter(ph_num=event['msg_from'])[0]
+        receiver_pk = Account.objects.filter(ph_num=event['msg_to'])[0]
         sent_timestamp = event['sent_timestamp']
 
         # print(json.dumps(event, indent=2))
 
-        # Send message to WebSocket
-        self.send(text_data=json.dumps({
-            'msg_from': msg_from,
-            'msg_to': msg_to,
-            'command': command,
-            'sent_timestamp': sent_timestamp,
-        }))
+        # striping datetime from 'sent_timestamp'
+        d = datetime.datetime.strptime(sent_timestamp, "%Y-%m-%d %H:%M:%S.%f")
 
-    # send response that the message was seen by the receiver
+        # querying the dialogue object that the data belongs to
+        dialogue = Dialogue.objects.filter(
+            sender=sender_pk, receiver=receiver_pk)
+
+        # updating the value
+        dialogue.update(last_received_receiver=d)
+
     def msg_read(self, event):
-        # TODO : (save/update last_seen_timestamp)
-
-        command = event['type']
-        msg_from = event['msg_from']
-        msg_to = event['msg_to']
+        # TODO : (save/update last_seen_receiver)
+        sender_pk = Account.objects.filter(ph_num=event['msg_from'])[0]
+        receiver_pk = Account.objects.filter(ph_num=event['msg_to'])[0]
         sent_timestamp = event['sent_timestamp']
 
         # print(json.dumps(event, indent=2))
 
-        # Send message to WebSocket
-        self.send(text_data=json.dumps({
-            'msg_from': msg_from,
-            'msg_to': msg_to,
-            'command': command,
-            'sent_timestamp': sent_timestamp,
-        }))
+        # striping datetime from 'sent_timestamp'
+        d = datetime.datetime.strptime(sent_timestamp, "%Y-%m-%d %H:%M:%S.%f")
 
-    # send response if the sender is typing
+        # querying the dialogue object that the data belongs to
+        dialogue = Dialogue.objects.filter(
+            sender=sender_pk, receiver=receiver_pk)
+
+        # updating the value
+        dialogue.update(last_seen_receiver=d)
+
     def is_typing(self, event):
-        # TODO : (save/update last_seen_timestamp)
+        # TODO : (send 'is_typing' messages)
+        pass
+
+    def last_active(self, event):
+        # TODO : (getback details from Dailogue and ActiveDetails)
 
         command = event['type']
         msg_from = event['msg_from']
@@ -253,8 +279,6 @@ class ChatSpecialConsumer(WebsocketConsumer):
     def receive(self, text_data):
         print("3")
         text_data_json = json.loads(text_data)
-        message = text_data_json['message']
-        command = text_data_json['command']
 
         # Send message to room group
         async_to_sync(self.channel_layer.group_send)(
@@ -269,47 +293,72 @@ class ChatSpecialConsumer(WebsocketConsumer):
         )
 
     # Receive message from your group
+    # [note : this will only work if the receiver is connected]
     def new_msg(self, event):
         print("4")
 
-        # quering Account table and creating variables
-        sender_pk = Account.objects.filter(ph_num=event['msg_from'])[0]
-        receiver_pk = Account.objects.filter(ph_num=event['msg_to'])[0]
-        message = event['message']
-        command = 'receive_msg'
+        # print(json.dumps(event, indent=2))
+
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({
+            'message': event['message'],
+            'msg_from': event['msg_from'],
+            'msg_to': event['msg_to'],
+            'command': event['type'],
+            'sent_timestamp': event['sent_timestamp'],
+        }))
+
+    # send response that the message was received by the receiver
+    def msg_received(self, event):
+        # TODO : (send last_received_receiver)
+
+        command = event['type']
         msg_from = event['msg_from']
         msg_to = event['msg_to']
-        sent_timestamp = event['sent_timestamp'],
+        sent_timestamp = event['sent_timestamp']
 
-        # editing serializer data
-        serialzerData = event
-        serialzerData['command'] = 'receive_msg'
-        serialzerData['sender'] = Account.objects.filter(
-            ph_num=serialzerData['msg_from'])[0].pk
-        serialzerData['receiver'] = Account.objects.filter(
-            ph_num=serialzerData['msg_to'])[0].pk
-        print(sent_timestamp)
-        serialzerData['sent_timestamp'] = sent_timestamp[0]
+        # print(json.dumps(event, indent=2))
 
-        serializer = MessageSerializer(data=serialzerData)
-        if serializer.is_valid():
-            serializer.save()
-        else:
-            print("serializer error occured in 'new_msg'")
+        # # Send message to WebSocket
+        self.send(text_data=json.dumps({
+            'msg_from': msg_from,
+            'msg_to': msg_to,
+            'command': command,
+            'sent_timestamp': sent_timestamp,
+        }))
 
-        serialzerData = serializer.validated_data
-        print(serialzerData)
-        serialzerData.pop('sender')
-        serialzerData.pop('receiver')
-        serialzerData['sent_timestamp'] = sent_timestamp
-
-        self.send(text_data=json.dumps(serialzerData))
-
-    # Receive message from your group
+    # send response that the message was seen by the receiver
     def msg_read(self, event):
+        # TODO : (save/update last_seen_receiver)
 
-        print("read")
+        command = event['type']
+        msg_from = event['msg_from']
+        msg_to = event['msg_to']
+        sent_timestamp = event['sent_timestamp']
 
+        # print(json.dumps(event, indent=2))
+
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({
+            'msg_from': msg_from,
+            'msg_to': msg_to,
+            'command': command,
+            'sent_timestamp': sent_timestamp,
+        }))
+
+    def is_typing(self, event):
+        command = event['type']
+        msg_from = event['msg_from']
+
+        # print(json.dumps(event, indent=2))
+
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({
+            'msg_from': msg_from,
+            'command': command,
+        }))
+
+    def last_active(self, event):
         command = event['type']
         msg_from = event['msg_from']
         msg_to = event['msg_to']

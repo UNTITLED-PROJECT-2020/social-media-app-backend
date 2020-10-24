@@ -1,3 +1,4 @@
+<!-- chat/templates/chat/room.html -->
 <!DOCTYPE html>
 <html>
 
@@ -19,20 +20,41 @@
     {{ msg_to | json_script:"msg_to" }}
 
     <script>
+
+        function addZero(x, n) {
+                    while (x.toString().length < n) {
+                        x = "0" + x;
+                    }
+                    return x;
+                }
+
+        function getTimestamp(){
+            var currentdate = new Date();
+            var datetime = currentdate.getFullYear() + "-" +
+                    addZero(currentdate.getMonth() + 1, 2) + "-" +
+                    addZero(currentdate.getDate(), 2) + " " +
+                    addZero(currentdate.getHours(), 2) + ":" +
+                    addZero(currentdate.getMinutes(), 2) + ":" +
+                    addZero(currentdate.getSeconds(), 2) + "." +
+                    currentdate.getMilliseconds();
+            
+            return datetime;
+        }
+
         const msg_from = JSON.parse(document.getElementById('msg_from').textContent);
         const msg_to = JSON.parse(document.getElementById('msg_to').textContent);
 
         console.log(`msg_from : ${msg_from}, msg_to : ${msg_to}`);
 
         const chatReceiveSocket = new WebSocket(
-            'ws://' +
+            'wss://' +
             window.location.host +
             '/ws/chat/special/' +
             msg_from + '/'
         );
 
         const chatSendSocket = new WebSocket(
-            'ws://' +
+            'wss://' +
             window.location.host +
             '/ws/chat/personal/' +
             msg_from + '/' + msg_to + '/'
@@ -57,7 +79,7 @@
             console.log(data);
 
             // put condition for type of data received on data.command
-            if (data['command'] == 'receive_msg') {
+            if (data['command'] == 'new_msg') {
                 console.log(`msg received, responce : ${e.data}`);
                 document.querySelector('#chat-log').value += ('\t\t' + data.message + ` [from: ${data.msg_from}]` +
                     '\n' + `\t\t\t   [received at : ${data['sent_timestamp']}]\n\n`);
@@ -84,7 +106,7 @@
                     'message': 'none',
                     'msg_from': msg_from,
                     'msg_to': msg_to,
-                    'command': 'msg_read',
+                    'command': 'msg_received',
                     'sent_timestamp': datetime,
                 }));
 
