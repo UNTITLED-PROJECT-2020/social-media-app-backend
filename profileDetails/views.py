@@ -4,6 +4,7 @@ from .serializers import AccountDetailSerializer
 from django.shortcuts import render
 #from rest_framework import viewsets
 from django.contrib.auth.models import User
+#from django.contrib.auth.models import User
 from rest_framework import generics,mixins,viewsets
 #from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
@@ -29,3 +30,4 @@ class AccountDetailViewset(viewsets.GenericViewSet,mixins.ListModelMixin,mixins.
         self.score=temp.get('score')
         serializer.save()
         return Response("Success Account Detail Created",status=status.HTTP_201_CREATED)
+

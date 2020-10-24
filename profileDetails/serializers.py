@@ -9,3 +9,4 @@ class AccountDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccountDetail
         fields=['id','fname','lname','bio','score','created','Account_foreignkey']
+    account= AccountSerializer(read_only=True)
