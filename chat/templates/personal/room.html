@@ -45,6 +45,7 @@
         const msg_to = JSON.parse(document.getElementById('msg_to').textContent);
 
         console.log(`msg_from : ${msg_from}, msg_to : ${msg_to}`);
+        console.log(`current location : ${window.location.host}`);
 
         const chatReceiveSocket = new WebSocket(
             'wss://' +
