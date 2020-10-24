@@ -50,8 +50,6 @@ class Account(AbstractBaseUser):  # creating custom/abstract user
     REQUIRED_FIELDS = ('ph_num', 'email')
     USERNAME_FIELD = 'username'
 
-    # f_name = models.CharField(max_length=100)
-    # l_name = models.CharField(max_length=100)
     username = models.CharField(max_length=10, unique=True)
     password = models.CharField(max_length=100)
     email = models.EmailField(max_length=100, unique=True)
@@ -77,7 +75,9 @@ class Account(AbstractBaseUser):  # creating custom/abstract user
     def has_module_perms(self, app_label):
         return True
 
-# creating reciever for automatic creation of auth tokens
+# creating receiver for automatic creation of auth tokens
+
+
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:

@@ -25,11 +25,55 @@ class GenericMessageViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mi
 
 
 # testing urls
-def index(request):
-    return render(request, 'testing/index.html', {})
+
+##################################################
+######## views for Personal Chats #############
+##################################################
+def personalIndex(request):
+    return render(request, 'personal/index.html', {})
 
 
-def room(request, room_name):
-    return render(request, 'testing/room.html', {
+def personalRoom(request, msg_from, msg_to):
+    return render(request, 'personal/room.html', {
+        'msg_from': msg_from,
+        'msg_to': msg_to,
+    })
+# test
+
+
+def personalIndexTest(request):
+    return render(request, 'personal/testing/index.html', {})
+
+
+def personalRoomTest(request, msg_from, msg_to):
+    return render(request, 'personal/testing/room.html', {
+        'msg_from': msg_from,
+        'msg_to': msg_to,
+    })
+
+##################################################
+######## views for Group Chats #############
+##################################################
+
+##################################################
+######## views for ChatRoom Chats #############
+##################################################
+
+
+def chatRoomIndex(request):
+    return render(request, 'room/index.html', {})
+
+
+def chatRoom(request, room_name):
+    return render(request, 'room/room.html', {
         'room_name': room_name
     })
+
+# test
+
+##################################################
+######## views for Special Chats #############
+##################################################
+
+# TODO : (get ActiveDetail of a user)
+# TODO : (get last_seen_receiver of a Dialogue)

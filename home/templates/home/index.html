@@ -1,23 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Bootstrap 4 project documentation theme for developers</title>
+    <title>Social Media App API</title>
     <!-- Meta -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">    
+    {% load static %}
     <link rel="shortcut icon" href="favicon.ico">  
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
     <!-- FontAwesome JS -->
-    <script defer src="assets/fontawesome/js/all.js"></script>
+    <script defer src="{% static 'assets/fontawesome/js/all.js' %}"></script>
     <!-- Global CSS -->
-    <link rel="stylesheet" href="assets/plugins/bootstrap/css/bootstrap.min.css">   
+    <link rel="stylesheet" href="{% static 'assets/plugins/bootstrap/css/bootstrap.min.css' %}">   
     <!-- Plugins CSS -->    
-    <link rel="stylesheet" href="assets/plugins/elegant_font/css/style.css">    
+    <link rel="stylesheet" href="{% static 'assets/plugins/elegant_font/css/style.css'%}">    
     <!-- Theme CSS -->
-    <link id="theme-style" rel="stylesheet" href="assets/css/styles.css">
+    <link id="theme-style" rel="stylesheet" href="{% static 'assets/css/styles.css' %}">
 
 </head> 
 
@@ -37,13 +38,12 @@
             <div class="container">
                 <div class="branding">
                     <h1 class="logo">
-                        <span aria-hidden="true" class="icon_documents_alt icon"></span>
-                        <span class="text-highlight">Pretty</span><span class="text-bold">Docs</span>
+                        <span class="text-highlight">UNTITLED</span><span class="text-bold">PROJECT</span>
                     </h1>
                 </div><!--//branding-->
                 <div class="tagline">
-                    <p>Free Bootstrap 4 theme for your project documentation</p>
-                    <p>Designed with <i class="fas fa-heart"></i> for developers</p>
+                    <p>Social Media App API</p>
+                    <p>Designed with <i class="fas fa-heart"></i></p>
                 </div><!--//tagline-->
                 
 	             <div class="main-search-box pt-3 pb-4 d-inline-block">
@@ -59,8 +59,8 @@
                 <div class="social-container">
 	                <!-- Replace with your Github Button -->
 	                <div class="github-btn mb-2">
-						<a class="github-button" href="https://github.com/xriley/PrettyDocs-Theme" data-size="large" aria-label="Star xriley/PrettyDocs-Theme on GitHub">Star</a>
-                        <a class="github-button" href="https://github.com/xriley" data-size="large" aria-label="Follow @xriley on GitHub">Follow @xriley</a>
+						<a class="github-button" href="https://github.com/UNTITLED-PROJECT-2020/social-media-app-backend" data-size="large" aria-label="Social Media App API">Star</a>
+                        <a class="github-button" href="https://github.com/UNTITLED-PROJECT-2020" data-size="large" aria-label="Follow on GitHub">Follow UNTITLED PROJECT</a>
 	                </div>
 	                <!-- Replace with your Twitter Button -->
                     <div class="twitter-tweet">
@@ -153,17 +153,17 @@
     <footer class="footer text-center">
         <div class="container">
             <!--/* This template is free as long as you keep the footer attribution link. If you'd like to use the template without the attribution link, you can buy the commercial license via our website: themes.3rdwavemedia.com Thank you for your support. :) */-->
-            <small class="copyright">Designed with <i class="fas fa-heart"></i> by <a href="https://themes.3rdwavemedia.com/" target="_blank">Xiaoying Riley</a> for developers</small>
+            <small class="copyright">Designed with <i class="fas fa-heart"></i> by <a href="https://github.com/UNTITLED-PROJECT-2020" target="_blank">UNTITLED PROJECT</a></small>
             
         </div><!--//container-->
     </footer><!--//footer-->
     
      
     <!-- Main Javascript -->          
-    <script type="text/javascript" src="assets/plugins/jquery-3.4.1.min.js"></script>
-    <script type="text/javascript" src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>     
-    <script type="text/javascript" src="assets/plugins/stickyfill/dist/stickyfill.min.js"></script>                                                                
-    <script type="text/javascript" src="assets/js/main.js"></script>
+    <script type="text/javascript" src="{% static 'assets/plugins/jquery-3.4.1.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'assets/plugins/bootstrap/js/bootstrap.min.js' %}"></script>     
+    <script type="text/javascript" src="{% static 'assets/plugins/stickyfill/dist/stickyfill.min.js' %}"></script>                                                                
+    <script type="text/javascript" src="{% static 'assets/js/main.js' %}"></script>
     
 </body>
 </html> 

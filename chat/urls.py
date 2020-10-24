@@ -12,6 +12,28 @@ authRouter = DefaultRouter()
 
 # urls
 urlpatterns = [
-    path('', views.index, name="index"),
-    path('<str:room_name>/', views.room, name="room"),
+    ##################################################
+    ######## urls for Personal Chats #############
+    ##################################################
+    path('personal/', views.personalIndex, name="Personal Index"),
+    path('personal/<str:msg_from>/<str:msg_to>/',
+         views.personalRoom, name="Personal Chat Room"),
+    # testing
+    path('personal/test', views.personalIndexTest, name="Personal Index"),
+    path('personal/test/<str:msg_from>/<str:msg_to>/',
+         views.personalRoomTest, name="Personal Chat Room"),
+
+    ##################################################
+    ######## urls for Group Chats #############
+    ##################################################
+
+    ##################################################
+    ######## urls for ChatRoom Chats #############
+    ##################################################
+    path('room/', views.chatRoomIndex, name="Chat Room Index"),
+    path('room/<str:room_name>/', views.chatRoom, name="Chat Room"),
+
+    ##################################################
+    ######## urls for Special Chats #############
+    ##################################################
 ]
