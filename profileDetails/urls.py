@@ -10,4 +10,5 @@ app_name = 'profileDetails'
 
 urlpatterns = [
     # path('', views.home, name="home"),
+    path('AccountDetail/', views.ProfileViewsets),
 ]
