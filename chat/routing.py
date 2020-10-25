@@ -4,6 +4,8 @@ from django.urls import re_path, path
 
 from . import consumers
 
+print("hellooooo22222")
+
 websocket_urlpatterns = [
     # personal chat
     re_path(r'ws/chat/personal/(?P<msg_from>\w+)/(?P<msg_to>\w+)/',
