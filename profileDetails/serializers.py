@@ -4,9 +4,8 @@ from authentication.serializers import AccountSerializer
 
 
 class AccountDetailSerializer(serializers.ModelSerializer):
-    #Account= AccountSerializer(read_only=True)
-    #account key commented out for now
+    # account key commented out for now
     class Meta:
         model = AccountDetail
-        fields=['id','fname','lname','bio','score','created','Account_foreignkey']
-    account= AccountSerializer(read_only=True)
+        fields = ['id', 'fname', 'lname', 'bio',
+                  'score', 'created', 'Account_foreignkey']

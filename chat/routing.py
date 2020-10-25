@@ -4,7 +4,6 @@ from django.urls import re_path, path
 
 from . import consumers
 
-print("hellooooo22222")
 
 websocket_urlpatterns = [
     # personal chat
