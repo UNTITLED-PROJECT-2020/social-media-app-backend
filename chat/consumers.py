@@ -15,25 +15,30 @@ from channels.generic.websocket import WebsocketConsumer
 
 Account = settings.AUTH_USER_MODEL
 
-# command dictionary
-commands = {
+'''
+# commands
+
     # message based
-    'new_msg',
-    'msg_sent',
-    'new_user',
-    'new_grp_msg',
-    'new_room_msg'
-    'img',
+
+    [*]  'new_msg',  
+    [*]  'msg_sent',
+    []  'new_grp_msg', 
+    []  'new_room_msg'
+    []  'img',
+
     # time based
-    'msg_received',
-    'msg_read',
-    'is_typing',
-    'last_active',
+
+    [*]  'msg_received',
+    []  'msg_read',
+    []  'is_typing',
+
     # special cases (for single user)
-    'fetch_msgs',
-    'delete_msgs',
-    'delete_msg',
+
+    []  'fetch_msgs',
+    []  'delete_msgs',
+    []  'delete_msg',
 }
+'''
 
 # initializing user model for querying
 Account = get_user_model()
@@ -86,7 +91,8 @@ class ChatPersonalConsumer(WebsocketConsumer):
 
     # Receive message reply from the message you sent
     def new_msg(self, event):
-        print("2")
+
+        print("Message Sent !!")
 
         # quering Account table and creating variables
         sender_pk = Account.objects.filter(ph_num=event['msg_from'])[0]
@@ -101,8 +107,6 @@ class ChatPersonalConsumer(WebsocketConsumer):
             sender=sender_pk, receiver=receiver_pk)[0].pk
         print(sent_timestamp)
         serializerData['sent_timestamp'] = sent_timestamp[0]
-
-        # print(serializerData)
 
         # saving serilizer data
         serializer = MessageSerializer(data=serializerData)
@@ -159,26 +163,7 @@ class ChatPersonalConsumer(WebsocketConsumer):
         dialogue.update(last_seen_receiver=d)
 
     def is_typing(self, event):
-        # TODO : (send 'is_typing' messages)
         pass
-
-    def last_active(self, event):
-        # TODO : (getback details from Dailogue and ActiveDetails)
-
-        command = event['type']
-        msg_from = event['msg_from']
-        msg_to = event['msg_to']
-        sent_timestamp = event['sent_timestamp']
-
-        # print(json.dumps(event, indent=2))
-
-        # Send message to WebSocket
-        self.send(text_data=json.dumps({
-            'msg_from': msg_from,
-            'msg_to': msg_to,
-            'command': command,
-            'sent_timestamp': sent_timestamp,
-        }))
 
 
 ##################################################
@@ -310,7 +295,6 @@ class ChatSpecialConsumer(WebsocketConsumer):
 
     # send response that the message was received by the receiver
     def msg_received(self, event):
-        # TODO : (send last_received_receiver)
 
         command = event['type']
         msg_from = event['msg_from']
@@ -329,7 +313,6 @@ class ChatSpecialConsumer(WebsocketConsumer):
 
     # send response that the message was seen by the receiver
     def msg_read(self, event):
-        # TODO : (save/update last_seen_receiver)
 
         command = event['type']
         msg_from = event['msg_from']
@@ -356,20 +339,4 @@ class ChatSpecialConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps({
             'msg_from': msg_from,
             'command': command,
-        }))
-
-    def last_active(self, event):
-        command = event['type']
-        msg_from = event['msg_from']
-        msg_to = event['msg_to']
-        sent_timestamp = event['sent_timestamp']
-
-        # print(json.dumps(event, indent=2))
-
-        # Send message to WebSocket
-        self.send(text_data=json.dumps({
-            'msg_from': msg_from,
-            'msg_to': msg_to,
-            'command': command,
-            'sent_timestamp': sent_timestamp,
         }))

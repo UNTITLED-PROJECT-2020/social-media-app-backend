@@ -10,6 +10,17 @@ from rest_framework import viewsets
 
 # Create your views here.
 
+'''
+endpoints to br implemented :
+
+    - get/update last_active (or check if user is active right now)
+    - get/update last_received_receiver
+    - get/update last_seen_receiver
+    - new_user
+    - new_grp
+    - new_room
+'''
+
 
 class GenericMessageViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
     # return username if login with any other field (i.e. : phone number, email)
@@ -29,6 +40,8 @@ class GenericMessageViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mi
 ##################################################
 ######## views for Personal Chats #############
 ##################################################
+# wss//:
+
 def personalIndex(request):
     return render(request, 'personal/index.html', {})
 
@@ -38,7 +51,8 @@ def personalRoom(request, msg_from, msg_to):
         'msg_from': msg_from,
         'msg_to': msg_to,
     })
-# test
+
+# ws//:
 
 
 def personalIndexTest(request):

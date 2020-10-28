@@ -11,10 +11,22 @@
     <textarea id="chat-log" cols="100" rows="20"></textarea><br>
     <input id="chat-message-input" type="text" size="100"><br>
     <input id="chat-message-submit" type="button" value="Send"><br><br>
-    <textarea id="seen-log" cols="60" rows="2"></textarea><br>
 
-    <br><br><br>
+    <br>
     <h1>this chat is for contact : {{msg_from}}</h1>
+
+    <br><br>
+    <h3>Time-Based Functions</h3>
+
+    <br>
+    <h4>msg_received box</h4>
+    <textarea id="received-log" cols="60" rows="2"></textarea><br>
+    <input id="chat-message-received" type="button" value="Send 'msg_received' command"><br><br>
+
+    <br>
+    <h4>msg_read box</h4>
+    <textarea id="seen-log" cols="60" rows="2"></textarea><br>
+    <input id="chat-message-seen" type="button" value="Send 'msg_read' command"><br><br>
 
     {{ msg_from | json_script:"msg_from" }}
     {{ msg_to | json_script:"msg_to" }}
@@ -84,7 +96,7 @@
                 document.querySelector('#chat-log').value += ('\t\t' + data.message + ` [from: ${data.msg_from}]` +
                     '\n' + `\t\t\t   [received at : ${data['sent_timestamp']}]\n\n`);
 
-                // creating timestamp
+                /*// creating timestamp
                 function addZero(x, n) {
                     while (x.toString().length < n) {
                         x = "0" + x;
@@ -99,7 +111,7 @@
                     addZero(currentdate.getHours(), 2) + ":" +
                     addZero(currentdate.getMinutes(), 2) + ":" +
                     addZero(currentdate.getSeconds(), 2) + "." +
-                    currentdate.getMilliseconds();
+                    currentdate.getMilliseconds();*/
 
                 // sending 'seen' responce
                 chatSendSocket.send(JSON.stringify({
@@ -107,11 +119,13 @@
                     'msg_from': msg_from,
                     'msg_to': msg_to,
                     'command': 'msg_received',
-                    'sent_timestamp': datetime,
+                    'sent_timestamp': getTimestamp(),
                 }));
 
             } else if (data['command'] == 'msg_read') {
                 document.querySelector('#seen-log').value = (`last message seen at ${data['sent_timestamp']}`);
+            } else if (data['command'] == 'msg_received'){
+                document.querySelector('#received-log').value = (`last message received at ${data['sent_timestamp']}`);
             }
         };
 
@@ -134,7 +148,7 @@
             const messageInputDom = document.querySelector('#chat-message-input');
             const message = messageInputDom.value;
 
-            // creating timestamp
+            /*// creating timestamp
             function addZero(x, n) {
                 while (x.toString().length < n) {
                     x = "0" + x;
@@ -151,7 +165,7 @@
                 addZero(currentdate.getSeconds(), 2); +
             "." + currentdate.getMilliseconds();
 
-            console.log(datetime);
+            console.log(datetime);*/
 
             // sending data
             chatSendSocket.send(JSON.stringify({
@@ -159,7 +173,7 @@
                 'command': 'new_msg',
                 'msg_from': msg_from,
                 'msg_to': msg_to,
-                'sent_timestamp': datetime,
+                'sent_timestamp': getTimestamp(),
             }));
 
             chatSendSocket.onmessage = function (e) {
@@ -177,6 +191,32 @@
 
             messageInputDom.value = '';
         };
+
+
+
+        // send message to other user that message was received
+        document.querySelector('#chat-message-received').onclick = function (e) {
+            // sending data
+            chatSendSocket.send(JSON.stringify({
+                'message': 'none',
+                'command': 'msg_received',
+                'msg_from': msg_from,
+                'msg_to': msg_to,
+                'sent_timestamp': getTimestamp(),
+            }));
+        }
+
+        // send message to other user that message was seen
+        document.querySelector('#chat-message-seen').onclick = function (e) {
+            // sending data
+            chatSendSocket.send(JSON.stringify({
+                'message': 'none',
+                'command': 'msg_read',
+                'msg_from': msg_from,
+                'msg_to': msg_to,
+                'sent_timestamp': getTimestamp(),
+            }));
+        }
     </script>
 </body>
 
