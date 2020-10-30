@@ -7,6 +7,7 @@ from .models import Message, Dialogue, ActiveDetail
 from django.conf import settings
 from .serializers import MessageSerializer
 # rest framework
+from rest_framework.renderers import JSONRenderer
 from .serializers import MessageSerializer
 # channels
 from channels.layers import get_channel_layer
@@ -29,14 +30,18 @@ Account = settings.AUTH_USER_MODEL
     # time based
 
     [*]  'msg_received',
-    []  'msg_read',
-    []  'is_typing',
+    [*]  'msg_read',
+    [*]  'is_typing',
 
     # special cases (for single user)
 
     []  'fetch_msgs',
     []  'delete_msgs',
     []  'delete_msg',
+
+    # error handling
+
+    [*] 'error',
 }
 '''
 
@@ -127,7 +132,7 @@ class ChatPersonalConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps(serializerData))
 
     def msg_received(self, event):
-        # TODO : (save/update last_received_receiver)
+        # save/update last_received_receiver
         sender_pk = Account.objects.filter(ph_num=event['msg_from'])[0]
         receiver_pk = Account.objects.filter(ph_num=event['msg_to'])[0]
         sent_timestamp = event['sent_timestamp']
@@ -145,7 +150,7 @@ class ChatPersonalConsumer(WebsocketConsumer):
         dialogue.update(last_received_receiver=d)
 
     def msg_read(self, event):
-        # TODO : (save/update last_seen_receiver)
+        # save/update last_seen_receiver
         sender_pk = Account.objects.filter(ph_num=event['msg_from'])[0]
         receiver_pk = Account.objects.filter(ph_num=event['msg_to'])[0]
         sent_timestamp = event['sent_timestamp']
@@ -165,6 +170,14 @@ class ChatPersonalConsumer(WebsocketConsumer):
     def is_typing(self, event):
         pass
 
+    def fetch_msgs(self, event):
+        pass
+
+    def delete_msg(self, event):
+        pass
+
+    def delete_msgs(self, event):
+        pass
 
 ##################################################
 ######## Consumer for Group Chats ################
@@ -240,7 +253,6 @@ class ChatSpecialConsumer(WebsocketConsumer):
     def connect(self):
         # getting aguements
         user_num = self.scope['url_route']['kwargs']['user_num']
-        # print(user_num)
 
         # self.channel_name = msg_from
         self.room_group_name = user_num
@@ -340,3 +352,123 @@ class ChatSpecialConsumer(WebsocketConsumer):
             'msg_from': msg_from,
             'command': command,
         }))
+
+    def fetch_msgs(self, event):
+        # TODO : (implement multiple message receive)
+        # getting aguements
+        user_num = self.scope['url_route']['kwargs']['user_num']
+
+        # querying dataset
+        msgs = Message.objects.filter(
+            # msg_from=event['msg_from'],
+            msg_to=user_num,)
+
+        # error handling if queryset is empty
+        if msgs.exists():
+            # serializing the queryset objects
+            serializer = MessageSerializer(msgs, many=True)
+
+            # creating json render of orderedDict and loading json
+            # print(JSONRenderer().render(serializer.data))
+            msgObj = json.loads(JSONRenderer().render(serializer.data))
+
+            # removing 'id' and 'dialogue' fields from each dictionary
+            serializerData = [{k: v for k, v in d.items() if (
+                k != 'id' and k != 'dialogue')} for d in serializer.data]
+
+            # # printing data
+            # print(json.dumps(serializerData, indent=1))
+
+            # Send message to WebSocket
+            self.send(text_data=json.dumps({
+                'command': "msgs_fetched",
+                'messages': json.dumps(serializerData),
+            }))
+
+            pass
+
+        else:
+            # Send message to WebSocket
+            self.send(text_data=json.dumps({
+                'msg_from': event['msg_from'],
+                'msg_to': event['msg_to'],
+                'command': "error",
+                'type': 'fetch_msgs',
+                'message': "could not find any messages to retrieve",
+            }))
+
+            pass
+
+        pass
+
+    def delete_msg(self, event):
+        # TODO : (implement single message delete)
+
+        # querying dataset
+        msg = Message.objects.filter(
+            msg_from=event['msg_from'],
+            msg_to=event['msg_to'],
+            sent_timestamp=event['message'])
+
+        # error handling if queryset is empty
+        if msg.exists():
+            # deleting the queryset object
+            msg[0].delete()
+
+            # Send message to WebSocket
+            self.send(text_data=json.dumps({
+                'msg_from': event['msg_from'],
+                'msg_to': event['msg_to'],
+                'command': "msg_deleted",
+            }))
+
+            pass
+        else:
+            # Send message to WebSocket
+            self.send(text_data=json.dumps({
+                'msg_from': event['msg_from'],
+                'msg_to': event['msg_to'],
+                'command': "error",
+                'type': 'delete_msg',
+                'message': "could not find the message you wanted to delete",
+            }))
+            pass
+
+        pass
+
+    def delete_msgs(self, event):
+        # TODO : (implement multiple message deletion)
+        # getting aguements
+        user_num = self.scope['url_route']['kwargs']['user_num']
+
+        # querying dataset
+        msg = Message.objects.filter(
+            # msg_from=event['msg_from'],
+            msg_to=user_num,)
+
+        # filtering again on the basis of date & time
+        msg_filter = msg.filter(sent_timestamp__lte=event['message'])
+
+        # error handling if queryset is empty
+        if msg_filter.exists():
+            # deleting the queryset objects
+            msg_filter.delete()
+
+            # Send message to WebSocket
+            self.send(text_data=json.dumps({
+                'msg_from': event['msg_from'],
+                'msg_to': event['msg_to'],
+                'command': "msgs_deleted",
+            }))
+            pass
+        else:
+            # Send message to WebSocket
+            self.send(text_data=json.dumps({
+                'msg_from': event['msg_from'],
+                'msg_to': event['msg_to'],
+                'command': "error",
+                'type': 'delete_msgs',
+                'message': "could not find any messages you wanted to delete",
+            }))
+            pass
+        pass

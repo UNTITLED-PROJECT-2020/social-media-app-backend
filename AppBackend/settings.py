@@ -55,6 +55,9 @@ REST_FRAMEWORK = {
     ]
 }
 
+# setting timezone
+# TIME_ZONE = 'Asia/Kolkata'
+
 # setting custom user
 AUTH_USER_MODEL = 'authentication.Account'
 
