@@ -1,6 +1,7 @@
 # imports
 import json
 from .models import Account
+from chat.models import ActiveDetail
 from .serializers import AccountSerializer
 # rest framework imports
 from rest_framework.response import Response
@@ -38,7 +39,7 @@ class GenericLoginViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin, mi
 
             # creating serializer and sending back data
             serializer = self.serializer_class(account)
-            return Response({"username": serializer.data['username']}, status=status.HTTP_200_OK)
+            return Response({"data": serializer.data}, status=status.HTTP_200_OK)
 
         else:
             data["error"] = "no data provided"
@@ -65,6 +66,9 @@ class GenericSignupViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
             data['response'] = "success"
             data['data'] = serializer.data
             data['token'] = str(token)
+
+            # creating ActiveDetail
+            activeDetail = ActiveDetail.objects.create(account=account)
 
             statusCode = status.HTTP_201_CREATED  # creating http code
 

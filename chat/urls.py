@@ -7,9 +7,6 @@ from rest_framework.routers import DefaultRouter
 # connected to 'auth/'
 app_name = 'chat'
 
-# creating router to redirect to
-authRouter = DefaultRouter()
-
 # urls
 urlpatterns = [
     ##################################################
@@ -36,4 +33,18 @@ urlpatterns = [
     ##################################################
     ######## urls for Special Chats #############
     ##################################################
+    path('special/',
+         views.GenericSpecialViewSet.as_view({'get': 'list'}), name="Special Index"),
+    path('special/<str:generate>/', views.GenericSpecialViewSet.as_view({'post': 'create'}),
+         name="Special Generate Chats"),
+
+    ##################################################
+    ######## urls for Chats Info #############
+    ##################################################
+    path('info/', views.GenericInfoViewSet.as_view(
+        {'get': 'list'}), name="Info Index"),
+    path('info/<str:user_num>/', views.GenericInfoViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
+         name="Info Active Details"),
+    path('info/<str:msg_from>/<str:msg_to>/',
+         views.GenericInfoViewSet.as_view({'get': 'retrieve'}), name="Info Last Read/Seen Details"),
 ]

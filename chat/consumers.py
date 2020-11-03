@@ -21,23 +21,23 @@ Account = settings.AUTH_USER_MODEL
 
     # message based
 
-    [*]  'new_msg',  
-    [*]  'msg_sent',
+    [*]  'new_msg', 
     []  'new_grp_msg', 
     []  'new_room_msg'
     []  'img',
 
     # time based
 
+    [*]  'msg_sent',
     [*]  'msg_received',
     [*]  'msg_read',
     [*]  'is_typing',
 
     # special cases (for single user)
 
-    []  'fetch_msgs',
-    []  'delete_msgs',
-    []  'delete_msg',
+    [*]  'fetch_msgs',
+    [*]  'delete_msgs',
+    [*]  'delete_msg',
 
     # error handling
 
@@ -354,7 +354,6 @@ class ChatSpecialConsumer(WebsocketConsumer):
         }))
 
     def fetch_msgs(self, event):
-        # TODO : (implement multiple message receive)
         # getting aguements
         user_num = self.scope['url_route']['kwargs']['user_num']
 
@@ -402,7 +401,6 @@ class ChatSpecialConsumer(WebsocketConsumer):
         pass
 
     def delete_msg(self, event):
-        # TODO : (implement single message delete)
 
         # querying dataset
         msg = Message.objects.filter(
@@ -437,7 +435,6 @@ class ChatSpecialConsumer(WebsocketConsumer):
         pass
 
     def delete_msgs(self, event):
-        # TODO : (implement multiple message deletion)
         # getting aguements
         user_num = self.scope['url_route']['kwargs']['user_num']
 
