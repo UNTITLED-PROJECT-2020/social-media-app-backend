@@ -19,11 +19,13 @@ class AccountDetailViewset(viewsets.GenericViewSet,mixins.ListModelMixin,mixins.
     queryset= AccountDetail.objects.all()
 
     def create(self,req):
-        req.data['Account_foreignkey']=req.user.pk #print(req.data) updating foreignkey from body to header's token
+        if(req.user.pk==None):return Response("Check Token attached",status=status.HTTP_400_BAD_REQUEST)
+        if(len(AccountDetail.objects.filter(Account=req.user.pk))==1):return Response("Profile Already Exsists",status=status.HTTP_400_BAD_REQUEST)
+        req.data['Account']=req.user.pk #print(req.data) updating foreignkey from body to header's token
         serializer = self.serializer_class(data=req.data) #Account.objects.filter(pk=req.user.pk)  serialziing the input data
         serializer.is_valid(raise_exception=True) #raising exception for bad data
         temp = serializer.validated_data   #getting the valid data as ordered dict
-        self.Account_foreignkey=temp.get('Account_foreignkey')  #saving all instances
+        self.Account=temp.get('Account')  #saving all instances
         self.fname=temp.get('fname')
         self.lname=temp.get('lname')
         self.bio=temp.get('bio')

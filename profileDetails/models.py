@@ -11,5 +11,5 @@ class AccountDetail(models.Model):
     #batch=models.IntegerField()
     #issues with existing columns
     created= models.DateTimeField(auto_now_add=True)
-    Account_foreignkey=models.OneToOneField(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
+    Account=models.OneToOneField(settings.AUTH_USER_MODEL,on_delete=models.CASCADE,primary_key=True)
     #img
