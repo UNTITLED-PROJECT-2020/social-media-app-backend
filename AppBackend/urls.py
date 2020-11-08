@@ -23,4 +23,5 @@ urlpatterns = [
     path('auth/', include('authentication.urls', namespace='authentication')),
     path('chat/', include('chat.urls', namespace='chat')),
     path('profile/', include('profileDetails.urls', namespace='profile')),
+    path('environments/', include('environments.urls', namespace='environments')),
 ]
