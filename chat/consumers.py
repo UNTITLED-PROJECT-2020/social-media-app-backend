@@ -97,8 +97,6 @@ class ChatPersonalConsumer(WebsocketConsumer):
     # Receive message reply from the message you sent
     def new_msg(self, event):
 
-        print("Message Sent !!")
-
         # quering Account table and creating variables
         sender_pk = Account.objects.filter(ph_num=event['msg_from'])[0]
         receiver_pk = Account.objects.filter(ph_num=event['msg_to'])[0]
@@ -110,7 +108,7 @@ class ChatPersonalConsumer(WebsocketConsumer):
         serializerData['command'] = 'msg_sent'
         serializerData['dialogue'] = Dialogue.objects.filter(
             sender=sender_pk, receiver=receiver_pk)[0].pk
-        print(sent_timestamp)
+
         serializerData['sent_timestamp'] = sent_timestamp[0]
 
         # saving serilizer data
@@ -123,7 +121,6 @@ class ChatPersonalConsumer(WebsocketConsumer):
 
         # editing serializer data for sending
         serializerData = serializer.validated_data
-        # print(serializerData)
 
         serializerData['sent_timestamp'] = sent_timestamp
         serializerData.pop('dialogue')
@@ -137,8 +134,6 @@ class ChatPersonalConsumer(WebsocketConsumer):
         receiver_pk = Account.objects.filter(ph_num=event['msg_to'])[0]
         sent_timestamp = event['sent_timestamp']
 
-        # print(json.dumps(event, indent=2))
-
         # striping datetime from 'sent_timestamp'
         d = datetime.datetime.strptime(sent_timestamp, "%Y-%m-%d %H:%M:%S.%f")
 
@@ -148,6 +143,9 @@ class ChatPersonalConsumer(WebsocketConsumer):
 
         # updating the value
         dialogue.update(last_received_receiver=d)
+
+        # automatically deleting message
+        self.delete_msg(event)
 
     def msg_read(self, event):
         # save/update last_seen_receiver
@@ -174,6 +172,30 @@ class ChatPersonalConsumer(WebsocketConsumer):
         pass
 
     def delete_msg(self, event):
+
+        # querying dataset
+        msg = Message.objects.filter(
+            msg_from=event['msg_to'],
+            msg_to=event['msg_from'],
+            sent_timestamp=event['message'])
+
+        # error handling if queryset is empty
+        if msg.exists():
+            # deleting the queryset object
+            msg[0].delete()
+
+            pass
+        else:
+            # Send message to WebSocket
+            self.send(text_data=json.dumps({
+                'msg_from': event['msg_from'],
+                'msg_to': event['msg_to'],
+                'command': "error",
+                'type': 'delete_msg',
+                'message': "could not find the message you wanted to delete",
+            }))
+            pass
+
         pass
 
     def delete_msgs(self, event):
@@ -274,7 +296,6 @@ class ChatSpecialConsumer(WebsocketConsumer):
 
     # Receive message from WebSocket and send them to group
     def receive(self, text_data):
-        print("3")
         text_data_json = json.loads(text_data)
 
         # Send message to room group
@@ -292,9 +313,6 @@ class ChatSpecialConsumer(WebsocketConsumer):
     # Receive message from your group
     # [note : this will only work if the receiver is connected]
     def new_msg(self, event):
-        print("4")
-
-        # print(json.dumps(event, indent=2))
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({
@@ -309,6 +327,7 @@ class ChatSpecialConsumer(WebsocketConsumer):
     def msg_received(self, event):
 
         command = event['type']
+        message = event['message']
         msg_from = event['msg_from']
         msg_to = event['msg_to']
         sent_timestamp = event['sent_timestamp']
@@ -317,6 +336,7 @@ class ChatSpecialConsumer(WebsocketConsumer):
 
         # # Send message to WebSocket
         self.send(text_data=json.dumps({
+            'message': message,
             'msg_from': msg_from,
             'msg_to': msg_to,
             'command': command,

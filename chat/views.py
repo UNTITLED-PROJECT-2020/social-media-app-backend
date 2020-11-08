@@ -24,8 +24,6 @@ endpoints to br implemented :
     - new_room
 '''
 
-# TODO : (Add Comments and clean-up code)
-
 
 class GenericInfoViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin):
     # retrieve different types of chat information, render index and update time information
@@ -189,8 +187,6 @@ def personalRoom(request, msg_from, msg_to):
         'msg_from': msg_from,
         'msg_to': msg_to,
     })
-
-# ws//:
 
 
 def personalIndexTest(request):

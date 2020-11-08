@@ -120,7 +120,7 @@
 
                 // sending 'seen' responce
                 chatSendSocket.send(JSON.stringify({
-                    'message': 'none',
+                    'message': data['sent_timestamp'],
                     'msg_from': msg_from,
                     'msg_to': msg_to,
                     'command': 'msg_received',
