@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'home',
     'profileDetails',
     'channels',
+    'environments',
 ]
 
 # setting token auth
