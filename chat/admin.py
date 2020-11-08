@@ -15,7 +15,7 @@ class MessageAdmin(admin.ModelAdmin):
                     'command', 'sent_timestamp', 'dialogue',)
 
     # filter list
-    list_filter = ('msg_from', 'command',)
+    list_filter = ('msg_from', 'msg_to', 'command',)
 
     # search parameters
     search_fields = ('msg_from', 'command', 'message',)
