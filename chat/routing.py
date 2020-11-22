@@ -4,23 +4,27 @@ from django.urls import re_path, path
 
 from . import consumers
 
+from chat.consumers.group import ChatGroupConsumer
+from chat.consumers.personal import ChatPersonalConsumer
+from chat.consumers.room import ChatRoomConsumer
+from chat.consumers.special import ChatSpecialConsumer
 
 websocket_urlpatterns = [
     # personal chat
     re_path(r'ws/chat/personal/(?P<msg_from>\w+)/(?P<msg_to>\w+)/',
-            consumers.ChatPersonalConsumer),
+            ChatPersonalConsumer),
 
     # group chat
-    re_path(r'ws/chat/group/(?P<msg_from>\w+)/(?P<group_name>\w+)/',
-            consumers.ChatGroupConsumer),
+    re_path(r'ws/chat/group/(?P<msg_from>\w+)/(?P<grp_name>\w+)/',
+            ChatGroupConsumer),
 
     # chat room
     re_path(r'ws/chat/room/(?P<room_name>\w+)/',
-            consumers.ChatRoomConsumer),
+            ChatRoomConsumer),
 
     # special cases
     re_path(r'ws/chat/special/(?P<user_num>\w+)/',
-            consumers.ChatSpecialConsumer),
+            ChatSpecialConsumer),
 ]
 
 channel_routing = {}

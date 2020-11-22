@@ -132,11 +132,11 @@
                 document.querySelector('#seen-log').value = (`last message seen at ${data['sent_timestamp']}`);
             } else if (data['command'] == 'msg_received'){
                 document.querySelector('#received-log').value = (`last message received at ${data['sent_timestamp']}`);
-            } else if (data['command'] == 'msgs_fetched'){
+            } else if (data['command'] == 'fetch_msgs'){
                 document.querySelector('#fetch-msgs-log').value = (JSON.stringify(JSON.parse(data['messages']), null, 1));
-            } else if (data['command'] == 'msg_deleted'){
+            } else if (data['command'] == 'delete_msg'){
                 document.querySelector('#delete-msg-log').value = ("Message Deleted");
-            } else if (data['command'] == 'msgs_deleted'){
+            } else if (data['command'] == 'delete_msgs'){
                 document.querySelector('#delete-msgs-log').value = ("Messages Deleted");
             } else if (data['command'] == 'error'){
                 if (data['type'] == 'fetch_msgs'){

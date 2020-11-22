@@ -1,21 +1,14 @@
-<!-- chat/templates/chat/personal/testing/room.html -->
+<!-- chat/templates/chat/group/testing/room.html -->
 <!DOCTYPE html>
 <html>
 
 <head>
     <meta charset="utf-8" />
-    <title>Test Chat Room</title>
+    <title>Test Group</title>
 </head>
 
 <body>
-    <textarea id="chat-log" cols="100" rows="20"></textarea>
-
-    <span style="display: inline-block;">
-            <p style="width: fit-content;margin: 0">is typing ??</p>
-            <textarea id="is-typing-log" cols="25" rows="2"></textarea>
-            <input id="is-typing-submit" type="button" value="Send">
-    </span><br>
-
+    <textarea id="chat-log" cols="100" rows="20"></textarea><br>
     <input id="chat-message-input" type="text" size="100"><br>
     <input id="chat-message-submit" type="button" value="Send"><br><br>
 
@@ -30,13 +23,11 @@
     <br>
     <h4>msg_received box</h4>
     <textarea id="received-log" cols="60" rows="2"></textarea><br>
-    <input id="received-input" type="text" size="100">
     <input id="chat-message-received" type="button" value="Send 'msg_received' command"><br><br>
 
     <br>
     <h4>msg_read box</h4>
     <textarea id="seen-log" cols="60" rows="2"></textarea><br>
-    <input id="seen-input" type="text" size="100">
     <input id="chat-message-seen" type="button" value="Send 'msg_read' command"><br><br>
 
     {{ msg_from | json_script:"msg_from" }}
@@ -52,7 +43,7 @@
     <textarea id="fetch-msgs-log" cols="100" rows="20"></textarea><br>
     <input id="fetch-msgs-btn" type="button" value="Send 'fetch_msgs' command"><br><br>
 
-    <!-- <br>
+    <br>
     <h4>delete_msg box</h4>
     <textarea id="delete-msg-log" cols="60" rows="2"></textarea><br>
     <input id="delete-msg-input" type="text" size="100">
@@ -62,7 +53,7 @@
     <h4>delete_msgs box</h4>
     <textarea id="delete-msgs-log" cols="60" rows="2"></textarea><br>
     <input id="delete-msgs-input" type="text" size="100">
-    <input id="delete-msgs-btn" type="button" value="Send 'delete_msgs' command"><br><br> -->
+    <input id="delete-msgs-btn" type="button" value="Send 'delete_msgs' command"><br><br>
 
     <script>
 
@@ -87,22 +78,22 @@
         }
 
         const msg_from = JSON.parse(document.getElementById('msg_from').textContent);
-        const msg_to = JSON.parse(document.getElementById('msg_to').textContent);
+        const grp = JSON.parse(document.getElementById('grp').textContent);
 
-        console.log(`msg_from : ${msg_from}, msg_to : ${msg_to}`);
+        console.log(`msg_from : ${msg_from}, group : ${grp}`);
 
         const chatReceiveSocket = new WebSocket(
-            'ws://' +
+            'wss://' +
             window.location.host +
             '/ws/chat/special/' +
             msg_from + '/'
         );
 
         const chatSendSocket = new WebSocket(
-            'ws://' +
+            'wss://' +
             window.location.host +
-            '/ws/chat/personal/' +
-            msg_from + '/' + msg_to + '/'
+            '/ws/chat/group/' +
+            msg_from + '/' + grp + '/'
         );
 
         //==================//
@@ -127,20 +118,25 @@
                 document.querySelector('#chat-log').value += ('\t\t' + data.message + ` [from: ${data.msg_from}]` +
                     '\n' + `\t\t\t   [received at : ${data['sent_timestamp']}]\n\n`);
 
+                // // sending 'seen' responce
+                // chatSendSocket.send(JSON.stringify({
+                //     'message': data['sent_timestamp'],
+                //     'msg_from': msg_from,
+                //     'msg_to': grp,
+                //     'command': 'msg_received',
+                //     'sent_timestamp': getTimestamp(),
+                // }));
+
             } else if (data['command'] == 'msg_read') {
                 document.querySelector('#seen-log').value = (`last message seen at ${data['sent_timestamp']}`);
             } else if (data['command'] == 'msg_received'){
                 document.querySelector('#received-log').value = (`last message received at ${data['sent_timestamp']}`);
             } else if (data['command'] == 'fetch_msgs'){
                 document.querySelector('#fetch-msgs-log').value = (JSON.stringify(JSON.parse(data['messages']), null, 1));
-            } else if (data['command'] == 'is_typing'){
-
-                if(data.msg_from.length > 10){
-                    document.querySelector('#is-typing-log').value = (data.msg_from.split("-")[1] + " is typing...");
-                } else {
-                    document.querySelector('#is-typing-log').value = (data.msg_from + " is typing...");
-                }
-
+            } else if (data['command'] == 'delete_msg'){
+                document.querySelector('#delete-msg-log').value = ("Message Deleted");
+            } else if (data['command'] == 'delete_msgs'){
+                document.querySelector('#delete-msgs-log').value = ("Messages Deleted");
             } else if (data['command'] == 'error'){
                 if (data['type'] == 'fetch_msgs'){
                     console.error(data['message']);
@@ -177,7 +173,7 @@
                 'message': message,
                 'command': 'new_msg',
                 'msg_from': msg_from,
-                'msg_to': msg_to,
+                'msg_to': grp,
                 'sent_timestamp': getTimestamp(),
             }));
 
@@ -197,44 +193,31 @@
             messageInputDom.value = '';
         };
 
-        // send message to other user that user is typing
-        document.querySelector('#is-typing-submit').onclick = function (e) {
-            // sending data
-            chatSendSocket.send(JSON.stringify({
-                'message': "-null-",
-                'command': 'is_typing',
-                'msg_from': msg_from,
-                'msg_to': msg_to,
-                'sent_timestamp': getTimestamp(),
-            }));
-        }
+
 
         // send message to other user that message was received
         document.querySelector('#chat-message-received').onclick = function (e) {
-            var timestamp = document.querySelector('#received-input').value;
             // sending data
             chatSendSocket.send(JSON.stringify({
-                'message': timestamp,
+                'message': 'none',
                 'command': 'msg_received',
                 'msg_from': msg_from,
-                'msg_to': msg_to,
+                'msg_to': grp,
                 'sent_timestamp': getTimestamp(),
             }));
         }
 
         // send message to other user that message was seen
         document.querySelector('#chat-message-seen').onclick = function (e) {
-            var timestamp = document.querySelector('#seen-input').value;
             // sending data
             chatSendSocket.send(JSON.stringify({
-                'message': timestamp,
+                'message': 'none',
                 'command': 'msg_read',
                 'msg_from': msg_from,
                 'msg_to': msg_to,
                 'sent_timestamp': getTimestamp(),
             }));
         }
-
 
         // fetch unread messages
         document.querySelector('#fetch-msgs-btn').onclick = function (e) {
@@ -246,6 +229,45 @@
                 'msg_to': msg_from,
                 'sent_timestamp': getTimestamp(),
             }));
+        }
+
+        // delete single message
+        document.querySelector('#delete-msg-btn').onclick = function (e) {
+            // time stamp variable
+            var timestamp = document.querySelector('#delete-msg-input').value;
+
+            if(timestamp.length != 0){
+                // sending data
+                chatReceiveSocket.send(JSON.stringify({
+                    'message': timestamp,
+                    'command': 'delete_msg',
+                    'msg_from': msg_to,
+                    'msg_to': msg_from,
+                    'sent_timestamp': getTimestamp(),
+                }));
+            } else {
+                console.error("'delete_msg' timestamp absent");
+            }
+            
+        }
+
+        // delete multiple messages
+        document.querySelector('#delete-msgs-btn').onclick = function (e) {
+            // time stamp variable
+            var timestamp = document.querySelector('#delete-msgs-input').value;
+
+            if(timestamp.length != 0){
+                // sending data
+                chatReceiveSocket.send(JSON.stringify({
+                    'message': timestamp,
+                    'command': 'delete_msgs',
+                    'msg_from': msg_to,
+                    'msg_to': msg_from,
+                    'sent_timestamp': getTimestamp(),
+                }));
+            } else {
+                console.error("'delete_msgs' timestamp absent");
+            }
         }
     </script>
 </body>
