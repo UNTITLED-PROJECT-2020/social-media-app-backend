@@ -48,7 +48,8 @@ to send the message to in place of **'grp'**
 ***ALWAYS AHBE SPECIFIC JSON FIELDS, THESE ARE :***
 ***['message', 'msg_from', 'msg_to', 'command', 'sent_timestamp']***
 
-======================================================================================================
+====================================================================================
+====================================================================================
 
 ### Personal Message Commands
 Here we implement the discoarse between 2 unique users. This is
@@ -64,6 +65,7 @@ deletes the message instance on the server freeing space.
 ---
 
 `new_msg`
+
 In this command the sender send a new message to the
 receiver, the sent message is saved in the database.
 
@@ -109,6 +111,7 @@ expected output [ in chatSendSocket.onmessage() ] :
 ---
 
 `msg_received`
+
 In this command the sender sends a message to the
 receiver, infering that an earlier message that was
 sent (by the receiver in this case) has been received 
@@ -149,6 +152,7 @@ expected output [ in chatReceiveSocket.onmessage() ] :
 ---
 
 `msg_read`
+
 In this command the sender sends a message to the
 receiver, infering that an earlier message that was
 sent (by the receiver in this case) has been read
@@ -184,6 +188,7 @@ expected output [ in chatReceiveSocket.onmessage() ] :
 ---
 
 `is_typing`
+
 In this command the sender sends a message to the
 receiver, infering that he/she is typing a message
 right-now.
@@ -218,6 +223,7 @@ expected output [ in chatReceiveSocket.onmessage() ] :
 ---
 
 `error`
+
 Sometimes an error may occor in authentication,
 or any of the above given command, in that case.
 specific error cases will be sent back to the receiver
@@ -240,7 +246,8 @@ expected output [ in chatSendSocket.onmessage() ] :
   }
 ```
 <!-- TODO: (Add All error cases) -->
-======================================================================================================
+====================================================================================
+====================================================================================
 
 ### Group Message Commands
 Here we implement the discoarse between 2 or more unique users. This 
@@ -266,6 +273,7 @@ heavily.
 ---
 
 `new_grp_msg`
+
 In this command the sender broadcasts a new message to 
 all the receivers, the sent message is saved in the 
 database.
@@ -312,14 +320,11 @@ expected output [ in chatSendSocket.onmessage() ] :
 ---
 
 `grp_msg_received`
+
 In this command the sender sends a message to the
 receiver, infering that an earlier message that was
 sent (by the receiver in this case) has been received 
 and stored locally.
-
-This method also updates the ***last_received_receiver***
-field in the Dialogue of the Sender using the
-***'sent_timestamp'*** field in the input
 
 **NOTE : EXECUTING THIS COMMAND WILL DELETE THE SAVED MESSAGE**
 **INSTANCE IN THE DATABASE, AND WOULD NOT BE AVAILABLE FOR FETCH.**
@@ -352,14 +357,11 @@ expected output [ in chatReceiveSocket.onmessage() ] :
 ---
 
 `grp_msg_read`
+
 In this command the sender sends a message to the
-receiver, infering that an earlier message that was
+group, infering that an earlier message that was
 sent (by the receiver in this case) has been read
 by the sender.
-
-This method also updates the ***last_seen_receiver***
-field in the Dialogue of the Sender using the
-***'sent_timestamp'*** field in the input
 
 
 expected input [ in chatSendSocket.send() ] :
@@ -387,8 +389,9 @@ expected output [ in chatReceiveSocket.onmessage() ] :
 ---
 
 `is_grp_typing`
+
 In this command the sender sends a message to the
-receiver, infering that he/she is typing a message
+group, infering that he/she is typing a message
 right-now.
 
 This message is to be displayed temporaryly at the
@@ -421,6 +424,7 @@ expected output [ in chatReceiveSocket.onmessage() ] :
 ---
 
 `error`
+
 Sometimes an error may occor in authentication,
 or any of the above given command, in that case.
 specific error cases will be sent back to the receiver
@@ -444,10 +448,12 @@ expected output [ in chatSendSocket.onmessage() ] :
 ```
 <!-- TODO: (Add All error cases) -->
 
-======================================================================================================
+====================================================================================
+====================================================================================
 ### Room Message Commands
 
-======================================================================================================
+====================================================================================
+====================================================================================
 ### Special Message Commands
 there are some commands that are only defined for 
 **chatReceiveSocket**, these are primaryly methods to
@@ -457,10 +463,14 @@ saved locally.
 ---
 
 `fetch_msgs`
-In this command the sender sends a message to the
-receiver, infering that an earlier message that was
-sent (by the receiver in this case) has been received 
-and stored locally.
+
+In this command the receiver sends a message to the
+backend server, to fetch all the personal messages that
+may have been received by the user while he was offline.
+
+After fetching these messsages can be saved locally and
+the a 'msg_received' comand could be sent automatically
+to delete all these instances and free up space online
 
 
 expected input [ in chatReceiveSocket.send() ] :
@@ -501,10 +511,14 @@ expected output [ in chatReceiveSocket.onmessage() ] :
 ---
 
 `fetch_grp_msgs`
-In this command the sender sends a message to the
-receiver, infering that an earlier message that was
-sent (by the receiver in this case) has been received 
-and stored locally.
+
+In this command the receiver sends a message to the
+backend server, to fetch all the group messages that
+may have been received by the user while he was offline.
+
+After fetching these messsages can be saved locally and
+the a 'grp_msg_received' comand could be sent automatically
+to delete all these instances and free up space online
 
 
 expected input [ in chatReceiveSocket.send() ] :
@@ -547,6 +561,7 @@ expected output [ in chatReceiveSocket.onmessage() ] :
 ---
 
 `error`
+
 Sometimes an error may occor in authentication,
 or any of the above given command, in that case.
 specific error cases will be sent back to the receiver
@@ -570,4 +585,5 @@ expected output [ in chatSendSocket.onmessage() ] :
 ```
 <!-- TODO: (Add All error cases) -->
 
-======================================================================================================
+====================================================================================
+====================================================================================
