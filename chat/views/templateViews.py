@@ -18,10 +18,10 @@ def personal(request, msg_from, msg_to):
     })
 
 
-def group(request, msg_from, msg_to):
+def group(request, msg_from, grp):
     return render(request, 'group.html', {
         'msg_from': msg_from,
-        'msg_to': msg_to,
+        'grp_name': grp,
     })
 
 
