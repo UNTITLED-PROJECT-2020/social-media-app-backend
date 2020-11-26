@@ -1,0 +1,321 @@
+<!-- chat/templates/index.html -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>Chat Index</title>
+  </head>
+
+  <style>
+        [data-theme="dark"] {
+        background-color: #111 !important;
+        color: #eee;
+        }
+
+        [data-theme="dark"] .bg-light {
+        background-color: #333 !important;
+        }
+
+        [data-theme="dark"] .bg-white {
+        background-color: #000 !important;
+        }
+
+        [data-theme="dark"] .bg-black {
+        background-color: #eee !important;
+        }
+
+        [data-theme="dark"] #accordion {
+        background-color: #000 !important;
+        }
+
+        [data-theme="dark"] .card {
+        background-color: #303030 !important;
+        border: 1px solid rgba(0, 0, 0, 0.125);
+        }
+
+        [data-theme="dark"] .input-group-prepend {
+        background-color: #303030 !important;
+        border: 1px solid rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="dark"] input {
+        background-color: #404040 !important;
+        border: 1px solid rgba(30, 30, 30, 0.5);
+        }
+  </style>
+
+  <body>
+    <br>
+
+    <div class="jumbotron jumbotron-fluid" style="background-image: url(https://codemyui.com/wp-content/uploads/2016/11/pure-css-snow-animation.gif);">
+        <div class="container">
+            <h1 class="display-4" style="color: aliceblue;">Greetings</h1>
+            <p class="lead" style="color: aliceblue;">Please select a method you want to try out.</p>
+        </div>
+    </div>
+
+    <div class="custom-control custom-switch ml-lg-3 mb-3">
+        <input type="checkbox" class="custom-control-input" id="darkSwitch" />
+        <label class="custom-control-label" for="darkSwitch">Dark Mode</label>
+    </div>
+
+
+    <!-- collapse group -->
+    <div id="accordion" style="width: 80%; margin: auto;">
+        <!-- personal card -->
+        <div class="card">
+            <div class="card-header" id="headingOne">
+                <h5 class="mb-0">
+                    <button class="btn collapsed btn-outline-primary btn-lg btn-block" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                        Personal Chat
+                    </button>
+                </h5>
+            </div>
+
+            <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
+                <div class="card-body">
+
+                    <!-- body -->
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Sender Phone Number</span>
+                        </div>
+                        <input id="personal-sender-input" type="text" maxlength="10" class="form-control" placeholder="Phone Number" aria-label="Phone Number" aria-describedby="basic-addon1">
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="basic-addon1">Receiver Phone Number</span>
+                        </div>
+                        <input id="personal-receiver-input" type="text" maxlength="10" class="form-control" placeholder="Phone Number" aria-label="Phone Number" aria-describedby="basic-addon1">
+                    </div>
+
+                    <input id="personal-submit" class="btn btn-primary mb-3" style="float: right;" type="submit" value="Submit">
+
+                </div>
+            </div>
+        </div>
+
+        <!-- group card -->
+        <div class="card">
+            <div class="card-header" id="headingTwo">
+            <h5 class="mb-0">
+                <button class="btn collapsed btn-outline-secondary btn-lg btn-block" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                    Group Chat
+                </button>
+            </h5>
+            </div>
+            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+            <div class="card-body">
+
+                <!-- body -->
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Sender Phone Number</span>
+                    </div>
+                    <input id="group-sender-input" type="text" maxlength="10" class="form-control" placeholder="Phone Number" aria-label="Phone Number" aria-describedby="basic-addon1">
+                </div>
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Group Name</span>
+                    </div>
+                    <input id="group-name-input" type="text" maxlength="10" class="form-control" placeholder="Group Name" aria-label="Group Name" aria-describedby="basic-addon1">
+                </div>
+
+                <input id="group-submit" class="btn btn-primary mb-3" style="float: right;" type="submit" value="Submit">
+
+
+            </div>
+            </div>
+        </div>
+
+        <!-- room card -->
+        <div class="card">
+            <div class="card-header" id="headingThree">
+            <h5 class="mb-0">
+                <button class="btn collapsed btn-outline-success btn-lg btn-block" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    Room Chat
+                </button>
+            </h5>
+            </div>
+            <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordion">
+            <div class="card-body">
+
+                <!-- body -->
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Sender Phone Number</span>
+                    </div>
+                    <input id="room-sender-input" type="text" maxlength="10" class="form-control" placeholder="Phone Number" aria-label="Phone Number" aria-describedby="basic-addon1">
+                </div>
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Room Name</span>
+                    </div>
+                    <input id="room-name-input" type="text" maxlength="10" class="form-control" placeholder="Room Name" aria-label="Room Name" aria-describedby="basic-addon1">
+                </div>
+
+                <input id="room-submit" class="btn btn-primary mb-3" style="float: right;" type="submit" value="Submit">
+
+            </div>
+            </div>
+        </div>
+
+        <!-- special card -->
+        <div class="card">
+            <div class="card-header" id="headingFour">
+            <h5 class="mb-0">
+                <button class="btn collapsed btn-outline-danger btn-lg btn-block" data-toggle="collapse" data-target="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
+                    Special Functions
+                </button>
+            </h5>
+            </div>
+            <div id="collapseFour" class="collapse" aria-labelledby="headingFour" data-parent="#accordion">
+            <div class="card-body">
+
+                <!-- body -->
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Sender Phone Number</span>
+                    </div>
+                    <input id="special-sender-input" type="text" maxlength="10" class="form-control" placeholder="Phone Number" aria-label="Phone Number" aria-describedby="basic-addon1">
+                </div>
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Receiver Phone Number</span>
+                    </div>
+                    <input id="special-receiver-input" type="text" maxlength="10" class="form-control" placeholder="Phone Number" aria-label="Phone Number" aria-describedby="basic-addon1">
+                </div>
+
+                <input id="special-submit" class="btn btn-primary mb-3" style="float: right;" type="submit" value="Submit">
+
+            </div>
+            </div>
+        </div>
+
+        <!-- info card -->
+        <div class="card">
+            <div class="card-header" id="headingFive">
+            <h5 class="mb-0">
+                <button class="btn collapsed btn-outline-info btn-lg btn-block" data-toggle="collapse" data-target="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
+                    Info Functions
+                </button>
+            </h5>
+            </div>
+            <div id="collapseFive" class="collapse" aria-labelledby="headingFive" data-parent="#accordion">
+            <div class="card-body">
+
+                <!-- body -->
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Sender Phone Number</span>
+                    </div>
+                    <input id="info-sender-input" type="text" maxlength="10" class="form-control" placeholder="Phone Number" aria-label="Phone Number" aria-describedby="basic-addon1">
+                </div>
+
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text" id="basic-addon1">Receiver Phone Number</span>
+                    </div>
+                    <input id="info-receiver-input" type="text" maxlength="10" class="form-control" placeholder="Phone Number" aria-label="Phone Number" aria-describedby="basic-addon1">
+                </div>
+
+                <input id="info-submit" class="btn btn-primary mb-3" style="float: right;" type="submit" value="Submit">
+
+            </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- JAVASCRIPT Logic -->
+    <script>
+        
+        // submit personal
+        document.querySelector('#personal-submit').onclick = function (e) {
+
+            // variables from input
+            var msg_from = document.querySelector('#personal-sender-input').value;
+            var msg_to = document.querySelector('#personal-receiver-input').value;
+
+            console.log(`msg_from : ${msg_from}, msg_to : ${msg_to}`);
+            window.location.pathname = '/chat/personal/' + msg_from + '/' + msg_to + '/';
+        };
+
+        // submit group
+        document.querySelector('#group-submit').onclick = function (e) {
+
+            // variables from input
+            var msg_from = document.querySelector('#group-sender-input').value;
+            var grp = document.querySelector('#group-name-input').value;
+
+            console.log(`msg_from : ${msg_from}, group : ${grp}`);
+            window.location.pathname = '/chat/group/' + msg_from + '/' + grp + '/';
+        };
+
+        // submit room
+        document.querySelector('#room-submit').onclick = function (e) {
+
+            // variables from input
+            var msg_from = document.querySelector('#room-sender-input').value;
+            var rom = document.querySelector('#room-name-input').value;
+
+            console.log(`msg_from : ${msg_from}, room : ${room}`);
+            window.location.pathname = '/chat/room/' + msg_from + '/' + room + '/';
+        };
+
+        // submit special
+        document.querySelector('#special-submit').onclick = function (e) {
+
+            // variables from input
+            var msg_from = document.querySelector('#special-sender-input').value;
+            var msg_to = document.querySelector('#special-receiver-input').value;
+
+            console.log(`msg_from : ${msg_from}, msg_to : ${msg_to}`);
+            window.location.pathname = '/chat/special/' + msg_from + '/' + msg_to + '/';
+        };
+
+        // submit info
+        document.querySelector('#info-submit').onclick = function (e) {
+
+            // variables from input
+            var msg_from = document.querySelector('#info-sender-input').value;
+            var msg_to = document.querySelector('#info-receiver-input').value;
+
+            console.log(`msg_from : ${msg_from}, msg_to : ${msg_to}`);
+            window.location.pathname = '/chat/info/' + msg_from + '/' + msg_to + '/';
+        };
+
+    </script>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <script>
+        const darkSwitch=document.getElementById("darkSwitch");
+        function initTheme(){
+            const e=null!==localStorage.getItem("darkSwitch")&&"dark"===localStorage.getItem("darkSwitch");
+            darkSwitch.checked=e,e?document.body.setAttribute("data-theme","dark"):document.body.removeAttribute("data-theme")}
+            function resetTheme(){darkSwitch.checked?(document.body.setAttribute("data-theme","dark"),
+            localStorage.setItem("darkSwitch","dark")):(document.body.removeAttribute("data-theme"),
+            localStorage.removeItem("darkSwitch"))}
+            window.addEventListener("load",()=>{
+                darkSwitch&&(initTheme(),darkSwitch.addEventListener("change",()=>{resetTheme()}))
+            });
+    </script>
+
+  </body>
+</html>

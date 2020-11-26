@@ -4,11 +4,9 @@ from .models import Account
 
 # Register your models here.
 
-# TODO : (add 'ph_num' to 'list_display')
-
 
 class AccountAdmin(UserAdmin):  # registering manager
-    list_display = ('pk', 'email', 'username', 'date_joined',
+    list_display = ('pk', 'email', 'username', 'ph_num', 'date_joined',
                     'last_login', 'is_admin', 'is_staff')
     search_fields = ('pk', 'email', 'username',)
     readonly_fields = ('pk', 'date_joined', 'last_login')
