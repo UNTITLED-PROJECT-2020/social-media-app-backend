@@ -10,9 +10,9 @@ app_name = 'authentication'
 
 # creating router to redirect to
 authRouter = DefaultRouter()
-authRouter.register('signup', views.GenericSignupViewSet, basename="signup")
+authRouter.register('signup/', views.GenericSignupViewSet, basename="signup")
 authRouter.register(
-    'loginData', views.GenericLoginViewSet, basename="login")
+    'loginData/', views.GenericLoginViewSet, basename="login")
 
 # urls
 urlpatterns = [
