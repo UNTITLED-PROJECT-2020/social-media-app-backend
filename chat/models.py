@@ -37,7 +37,7 @@ class Message(models.Model):    # message model
         null=True, blank=True, verbose_name='sent timestamp')
     dialogue = models.ForeignKey(
         Dialogue, on_delete=models.CASCADE, related_name='message',
-        verbose_name='dialogue key', blank=True, null=True)
+        verbose_name='dialogue key', default=None)
     # received_timestamp = models.DateTimeField(null=True, default=None)
 
     def __str__(self):
@@ -61,7 +61,7 @@ class Group(models.Model):    # Group model
     name = models.CharField(
         max_length=30, verbose_name='Group Name', blank=True, null=True)
     key = models.CharField(
-        max_length=10, verbose_name='Group Key', unique=True)
+        max_length=10, verbose_name='Group Key', unique=True, default=None)
     bio = models.CharField(
         max_length=80, verbose_name='Group Bio', blank=True, null=True)
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="participants",
@@ -74,9 +74,9 @@ class Group(models.Model):    # Group model
 
 class GroupMessage(models.Model):    # Group Message model
     msg_from = models.CharField(
-        max_length=10, verbose_name='Message From', blank=True, null=True)
+        max_length=10, verbose_name='Message From', default=None)
     msg_to = models.CharField(
-        max_length=10, verbose_name='Message To', blank=True, null=True)
+        max_length=10, verbose_name='Message To', default=None)
     message = models.CharField(max_length=1200)
     command = models.CharField(max_length=20, default='')
     sent_timestamp = models.DateTimeField(
