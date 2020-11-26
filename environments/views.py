@@ -47,8 +47,22 @@ class UserInEnvViewset(viewsets.GenericViewSet,mixins.ListModelMixin,mixins.Crea
         mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
     serializer_class=UserInEnvSerializer
     queryset= UserInEnv.objects.all()
+
+
+
 @api_view(('GET',))
 def UserEnv(req):
     print(req.user.pk)
     serializer=UserInEnvSerializer(UserInEnv.objects.filter(User_Key=req.user.pk),many=True)
     return Response(serializer.data,status=status.HTTP_200_OK)
+
+@api_view(('POST',))
+def join(req):
+    if(req.user.pk==None):return Response("Check Token attached",status=status.HTTP_400_BAD_REQUEST)
+    items=req.data.get("join")
+    for item in items:
+        item=Environments.objects.filter(Name=item)[0].id
+        serializer=UserInEnvSerializer(data={'Env_Key':item,'User_Key':req.user.pk})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+    return Response("Done",status=status.HTTP_200_OK)

@@ -9,6 +9,7 @@ class EnvironmentsSerializer(serializers.ModelSerializer):
             'id','Name','Description','created'
         ]
 class UserInEnvSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = UserInEnv
         fields=[

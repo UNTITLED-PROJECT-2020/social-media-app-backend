@@ -11,12 +11,10 @@ class Environments(models.Model):
 #    UserInEnvironments =models.ManyToManyField(settings.AUTH_USER_MODEL,blank=True)
 
 class UserInEnv(models.Model):
-
     Env_Key=models.ForeignKey(Environments,on_delete=models.CASCADE)
     User_Key=models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE)
     class Meta:
         unique_together=[['Env_Key','User_Key']]
-
 #User= settings.AUTH_USER_MODEL
 #admin_user=User.objects.filter(username="admin")
 #admin_user[0].environments_set.all()

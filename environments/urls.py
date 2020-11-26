@@ -8,7 +8,8 @@ from .router import router
 app_name = 'environments'
 
 urlpatterns = [
+    path('join/',views.join),
     path('name/<str:name>/',views.env),
-    path('UserEnv/',views.UserEnv),
+    path('userenv/',views.UserEnv),
     path('',include((router.urls,'/'),namespace='environments')),
 ]
