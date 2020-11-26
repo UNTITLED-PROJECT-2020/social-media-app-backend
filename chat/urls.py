@@ -1,66 +1,92 @@
 # imports
-from .views import views, templateViews, chatViews, infoViews
-from django.urls import include, path, re_path
+from .views import chatViews, infoViews
+from .views.templateViews import index, personal, group, room, special, info
+from django.urls import path
 # rest framework imports
 from rest_framework.routers import DefaultRouter
 
 # connected to 'chat/'
 app_name = 'chat'
 
+# dictionary of all the generic methods
+method_dict = {
+    #     'get': 'list',
+    'post': 'create',
+    'put': 'update',
+    'patch': 'retrieve',
+    'delete': 'delete',
+}
+
 # urls
 urlpatterns = [
-    path('', templateViews.index, name="Index Page"),
 
-    ##################################################
-    ######## urls for Personal Chats #############
-    ##################################################
-    path('personal/', templateViews.personalIndex, name="Personal Index"),
+    ##########################################
+    ######## urls for Chat Index #############
+    ##########################################
+
+    path('',
+         index, name="Index Page"),
+
     path('personal/<str:msg_from>/<str:msg_to>/',
-         templateViews.personalRoom, name="Personal Chat Room"),
-    # testing
-    path('personal/test', templateViews.personalIndexTest, name="Personal Index"),
-    path('personal/test/<str:msg_from>/<str:msg_to>/',
-         templateViews.personalRoomTest, name="Personal Chat Room"),
+         personal, name="Personal Chat Room"),
 
-    ##################################################
-    ######## urls for Group Chats #############
-    ##################################################
-    path('group/', templateViews.groupIndex, name="Group Index"),
     path('group/<str:msg_from>/<str:grp>/',
-         templateViews.groupRoom, name="Group Chat Room"),
-    # testing
-    path('group/test', templateViews.groupIndexTest, name="Group Index"),
-    path('group/test/<str:msg_from>/<str:grp>/',
-         templateViews.groupRoomTest, name="Group Chat Room"),
+         group, name="Group Chat Room"),
+
+    path('room/<str:msg_from>/<str:room_name>/',
+         room, name="Chat Room"),
+
+    # TODO : (define urls for special and info)
+
+        #     path('special/',
+        #          special, name="Chat Room"),
+
+    path('info/',
+         info, name="Chat Room"),
+
+
+    ###############################################################
+    ######## urls for creating/updating/deleting Chat #############
+    ###############################################################
+
+    path('special/personal/',
+         chatViews.GenericPersonalViewSet.as_view(method_dict),
+         name="Personal Views"),
+
+    path('special/group/',
+         chatViews.GenericGroupViewSet.as_view(method_dict),
+         name="Group Views"),
+
+        #     path('special/room/',
+        #          chatViews.GenericRoomViewSet.as_view(method_dict),
+        #          name="Room Views"),
+
+        #     path('special/special/',
+        #          chatViews.GenericSpecialViewSet.as_view(method_dict),
+        #          name="Special Views"),
+
 
     ##################################################
-    ######## urls for ChatRoom Chats #############
+    ######## urls for getting Chat Info #############
     ##################################################
-    path('room/', templateViews.chatRoomIndex, name="Chat Room Index"),
-    path('room/<str:room_name>/', templateViews.chatRoom, name="Chat Room"),
 
+    path('info/personal/',
+         infoViews.GenericPersonalInfoViewSet.as_view(method_dict),
+         name="Info Personal Details"),
 
+    path('info/group/',
+         infoViews.GenericGroupInfoViewSet.as_view(method_dict),
+         name="Info Group Details"),
 
+        #     path('info/room/',
+        #          infoViews.GenericRoomInfoViewSet.as_view(method_dict),
+        #          name="Info Room Details"),
 
+        #     path('info/special/',
+        #          infoViews.GenericSpecialInfoViewSet.as_view(method_dict),
+        #          name="Info Special Details"),
 
-
-
-
-    ##################################################
-    ######## urls for Special Chats #############
-    ##################################################
-    path('special/',
-         chatViews.GenericSpecialViewSet.as_view({'get': 'list'}), name="Special Index"),
-    path('special/<str:generate>/', chatViews.GenericSpecialViewSet.as_view({'post': 'create'}),
-         name="Special Generate Chats"),
-
-    ##################################################
-    ######## urls for Chats Info #############
-    ##################################################
-    path('info/', infoViews.GenericInfoViewSet.as_view(
-        {'get': 'list'}), name="Info Index"),
-    path('info/<str:user_num>/', infoViews.GenericInfoViewSet.as_view({'get': 'retrieve', 'put': 'update'}),
+    path('info/active/',
+         infoViews.GenericActiveInfoViewSet.as_view(method_dict),
          name="Info Active Details"),
-    path('info/<str:msg_from>/<str:msg_to>/',
-         infoViews.GenericInfoViewSet.as_view({'get': 'retrieve'}), name="Info Last Read/Seen Details"),
 ]

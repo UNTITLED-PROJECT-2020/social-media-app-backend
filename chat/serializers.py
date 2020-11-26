@@ -1,4 +1,7 @@
 # imports
+import uuid
+
+from django.http.response import JsonResponse
 from .models import Message, Dialogue, GroupMessage, Group
 from django.contrib.auth import get_user_model as User
 # rest framework imports
@@ -41,6 +44,49 @@ class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = ['name', 'key', 'bio', 'participants', 'admin']
+
+    def create(self, validated_data):
+        # error handling
+        try:
+            print(validated_data)
+            # adding empty m2m field
+            participants = validated_data.pop('participants')
+            admin = validated_data.pop('admin')
+
+            # generating key
+            while True:
+                grp_key = uuid.uuid4().hex[:10].upper()
+
+                try:
+                    group = Group.objects.get(key=grp_key)
+
+                except Group.DoesNotExist:
+                    validated_data['key'] = grp_key
+                    break
+
+            # Create Group Message Instance
+            instance = self.Meta.model.objects.create(**validated_data)
+
+            # adding m2m relation
+            for user in admin:
+                print(user)
+                instance.admin.add(user)
+
+                if user not in participants:
+                    participants.append(user)
+
+            for user in participants:
+                instance.participants.add(user)
+
+        except exceptions.ValidationError as e:
+            errors_messages = e.error_dict if hasattr(
+                e, 'error_dict') else e.error_list
+
+            # raise serializers.ValidationError(errors_messages)
+            return JsonResponse(serializers.ValidationError(errors_messages))
+
+        # returning json instance of the created message
+        return GroupSerializer(instance).data
 
 
 # serializing Groups Messages

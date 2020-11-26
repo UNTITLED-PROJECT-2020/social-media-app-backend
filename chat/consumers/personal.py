@@ -3,7 +3,6 @@ import json
 import datetime
 from django.contrib.auth import get_user_model
 from ..models import Message, Dialogue
-from django.conf import settings
 from ..serializers import MessageSerializer
 # rest framework
 from ..serializers import MessageSerializer
@@ -75,15 +74,15 @@ class ChatPersonalConsumer(WebsocketConsumer):
         sender_pk = Account.objects.filter(ph_num=event['msg_from'])[0]
         receiver_pk = Account.objects.filter(ph_num=event['msg_to'])[0]
         msg_from = event['msg_from']
+
         sent_timestamp = event['sent_timestamp'],
 
         # editing serializer input data
         serializerData = event
-        serializerData['dialogue'] = Dialogue.objects.filter(
-            sender=sender_pk, receiver=receiver_pk)[0].pk
+        serializerData['dialogue'] = Dialogue.objects.get(
+            sender=sender_pk, receiver=receiver_pk).pk
 
-        serializerData['sent_timestamp'] = sent_timestamp[0]
-        serializerData['command'] = 'new_msg'
+        serializerData['command'] = event.pop('type')
 
         # saving serilizer data
         serializer = MessageSerializer(data=serializerData)
@@ -97,14 +96,13 @@ class ChatPersonalConsumer(WebsocketConsumer):
         serializerData = serializer.validated_data
 
         # adding current time to sent_timestamp
-        event['sent_timestamp'] = datetime.datetime.now().strftime(
+        serializerData['sent_timestamp'] = datetime.datetime.now().strftime(
             '%Y-%m-%dT%H:%M:%S.%f%Z')
         serializerData['command'] = 'msg_sent'
-        serializerData['message'] = sent_timestamp
+        serializerData['message'] = sent_timestamp[0]
         serializerData.pop('dialogue')
 
         # sending data back to sender
-        # print(serializerData)
         self.send(text_data=json.dumps(serializerData))
 
     # send received command on a previous message

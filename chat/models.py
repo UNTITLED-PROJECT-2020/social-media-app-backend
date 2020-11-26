@@ -12,13 +12,15 @@ class Dialogue(models.Model):  # dialogue model
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='sender', default=None)
     receiver = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='receiver', default=None)
-    last_received_receiver = models.DateTimeField(null=True, blank=True)
-    last_seen_receiver = models.DateTimeField(null=True, blank=True)
+    last_received_receiver = models.DateTimeField(auto_now_add=True)
+    last_seen_receiver = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.sender.username
 
     class Meta:
+        unique_together = ('sender', 'receiver',)
+
         ordering = ('receiver', '-last_seen_receiver',
                     '-last_received_receiver',)
 
@@ -57,11 +59,11 @@ class ActiveDetail(models.Model):
 # Dialogue model for a conversation between multiple people
 class Group(models.Model):    # Group model
     name = models.CharField(
-        max_length=20, verbose_name='Group Name', blank=True, null=True)
+        max_length=30, verbose_name='Group Name', blank=True, null=True)
     key = models.CharField(
-        max_length=10, verbose_name='Group Key', blank=True, null=True)
+        max_length=10, verbose_name='Group Key', unique=True)
     bio = models.CharField(
-        max_length=50, verbose_name='Group Bio', blank=True, null=True)
+        max_length=80, verbose_name='Group Bio', blank=True, null=True)
     participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="participants",
                                           verbose_name='group participants', default=None)
     admin = models.ManyToManyField(settings.AUTH_USER_MODEL,

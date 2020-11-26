@@ -3,7 +3,6 @@ import json
 import datetime
 from django.contrib.auth import get_user_model
 from ..models import Group, GroupMessage, Message
-from django.conf import settings
 # rest framework
 from ..serializers import GroupMessageSerializer
 # channels
