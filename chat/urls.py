@@ -33,7 +33,7 @@ urlpatterns = [
     path('group/<str:msg_from>/<str:grp>/',
          group, name="Group Chat Room"),
 
-    path('room/<str:msg_from>/<str:room_name>/',
+    path('room/<str:msg_from>/',
          room, name="Chat Room"),
 
     # TODO : (define urls for special and info)
