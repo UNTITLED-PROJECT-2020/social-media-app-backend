@@ -48,14 +48,9 @@
     <h3>Special Functions</h3>
 
     <br>
-    <h4>fetch_msgs box</h4>
+    <h4>fetch_room_msgs box</h4>
     <textarea id="fetch-msgs-log" cols="100" rows="20"></textarea><br>
-    <input id="fetch-msgs-btn" type="button" value="Send 'fetch_msgs' command"><br><br>
-
-    <br>
-    <h4>fetch_grp_msgs box</h4>
-    <textarea id="fetch-grp-msgs-log" cols="100" rows="20"></textarea><br>
-    <input id="fetch-grp-msgs-btn" type="button" value="Send 'fetch_grp_msgs' command"><br><br>
+    <input id="fetch-msgs-btn" type="button" value="Send 'fetch_room_msgs' command"><br><br>
 
     <script>
 
@@ -103,7 +98,7 @@
             var currentdate = new Date();
             var datetime = currentdate.getFullYear() + "-" +
                     addZero(currentdate.getMonth() + 1, 2) + "-" +
-                    addZero(currentdate.getDate(), 2) + " " +
+                    addZero(currentdate.getDate(), 2) + "T" +
                     addZero(currentdate.getHours(), 2) + ":" +
                     addZero(currentdate.getMinutes(), 2) + ":" +
                     addZero(currentdate.getSeconds(), 2) + "." +
@@ -142,6 +137,9 @@
                 if(data.msg_from.length > 10){
                     document.querySelector('#chat-log').value += ('\t\t' + data.message + ` [from: ${(data.msg_from).split("-")[1]}]` +
                     '\n' + `\t\t\t   [received at : ${data['sent_timestamp']}]\n\n`);
+                } else if(data.msg_from.length < 10) {
+                    document.querySelector('#chat-log').value += ('\t\t' + data.message + ` [from: ROOM]` +
+                    '\n' + `\t\t\t   [received at : ${data['sent_timestamp']}]\n\n`);
                 } else {
                     document.querySelector('#chat-log').value += ('\t\t' + data.message + ` [from: ${data.msg_from}]` +
                     '\n' + `\t\t\t   [received at : ${data['sent_timestamp']}]\n\n`);
@@ -152,12 +150,9 @@
             } else if (data['command'] == 'msg_received'){
                 console.log(data)
                 document.querySelector('#received-log').value = (`last message received at ${data['sent_timestamp']}`);
-            } else if (data['command'] == 'fetch_msgs'){
+            } else if (data['command'] == 'fetch_room_msgs'){
                 console.log(data['messages']);
                 document.querySelector('#fetch-msgs-log').value = (JSON.stringify(JSON.parse(data['messages']), null, 1));
-            } else if (data['command'] == 'fetch_grp_msgs'){
-                console.log(data['messages']);
-                document.querySelector('#fetch-grp-msgs-log').value = (JSON.stringify(JSON.parse(data['messages']), null, 1));
             } else if (data['command'] == 'delete_msg'){
                 document.querySelector('#delete-msg-log').value = ("Message Deleted");
             } else if (data['command'] == 'delete_msgs'){
@@ -171,7 +166,7 @@
                 }
 
             } else if (data['command'] == 'error'){
-                if (data['type'] == 'fetch_msgs'){
+                if (data['type'] == 'fetch_room_msgs'){
                     console.error(data['message']);
                 } else if (data['type'] == 'delete_msg'){
                     console.error(data['message']);
@@ -213,9 +208,9 @@
             // sending data
             chatSendSocket.send(JSON.stringify({
                 'message': message,
-                'command': 'new_grp_msg',
+                'command': 'new_msg',
                 'msg_from': msg_from,
-                'msg_to': grp,
+                'msg_to': "room",
                 'sent_timestamp': getTimestamp(),
             }));
 
@@ -230,9 +225,9 @@
             // sending data
             chatSendSocket.send(JSON.stringify({
                 'message': "-null-",
-                'command': 'is_grp_typing',
+                'command': 'is_typing',
                 'msg_from': msg_from,
-                'msg_to': grp,
+                'msg_to': "room",
                 'sent_timestamp': getTimestamp(),
             }));
         }
@@ -243,9 +238,9 @@
             // sending data
             chatSendSocket.send(JSON.stringify({
                 'message': timestamp,
-                'command': 'grp_msg_received',
+                'command': 'msg_received',
                 'msg_from': msg_from,
-                'msg_to': grp,
+                'msg_to': "room",
                 'sent_timestamp': getTimestamp(),
             }));
         }
@@ -256,32 +251,20 @@
             // sending data
             chatSendSocket.send(JSON.stringify({
                 'message': timestamp,
-                'command': 'grp_msg_read',
+                'command': 'msg_read',
                 'msg_from': msg_from,
-                'msg_to': grp,
-                'sent_timestamp': getTimestamp(),
-            }));
-        }
-
-        // fetch unread messages
-        document.querySelector('#fetch-msgs-btn').onclick = function (e) {
-            // sending data (interchange for correctness)
-            chatReceiveSocket.send(JSON.stringify({
-                'message': 'none',
-                'command': 'fetch_msgs',
-                'msg_from': grp,
-                'msg_to': msg_from,
+                'msg_to': "room",
                 'sent_timestamp': getTimestamp(),
             }));
         }
 
         // fetch unread group messages
-        document.querySelector('#fetch-grp-msgs-btn').onclick = function (e) {
+        document.querySelector('#fetch-msgs-btn').onclick = function (e) {
             // sending data (interchange for correctness)
             chatReceiveSocket.send(JSON.stringify({
                 'message': '--null--',
-                'command': 'fetch_grp_msgs',
-                'msg_from': grp,
+                'command': 'fetch_room_msgs',
+                'msg_from': "room",
                 'msg_to': msg_from,
                 'sent_timestamp': getTimestamp(),
             }));

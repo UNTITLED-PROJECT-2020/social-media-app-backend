@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model as User
 from rest_framework import exceptions
 from rest_framework import serializers
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 
 # creating serializers for models to work with
 
@@ -154,24 +155,28 @@ class RoomSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # error handling
         try:
-            print(validated_data)
             # adding empty m2m field
             participants = validated_data.pop('participants')
 
             # checking if there are only 2 people in thr room
             if len(participants) != 2:
-                return JsonResponse({"info": "error",
-                                     "detail": "wrong number of participants"},
-                                    status=status.HTTP_400_BAD_REQUEST)
+                return {"info" : "error", "message": "wrong number of participants in room", "code": 400}
+
+            # getting the active rooms of the participants
+            rooms = Room.objects.filter(participants__in=participants).distinct()
+
+            # error handling if sender or receiver are in rooms already
+            if rooms.exists():
+                return {"info" : "error", "message": "participant(s) are already in room", "code": 400}
 
             # Create Room Message Instance
             instance = self.Meta.model.objects.create(**validated_data)
 
-            # TODO : (keep participants in a room unique)
-
             # adding m2m relation
             for user in participants:
                 instance.participants.add(user)
+
+            data = RoomSerializer(instance).data
 
         except exceptions.ValidationError as e:
             errors_messages = e.error_dict if hasattr(
@@ -181,7 +186,7 @@ class RoomSerializer(serializers.ModelSerializer):
             return JsonResponse(serializers.ValidationError(errors_messages))
 
         # returning json instance of the created message
-        return RoomSerializer(instance).data
+        return {"info" : "sucess", "message": "room was created", "code": 200, "data": data}
 
 # serializing Room Messages
 
@@ -198,9 +203,9 @@ class RoomMessageSerializer(serializers.ModelSerializer):
         try:
 
             # getting the key of the room
-            validated_data["room"] = Room.objects.get(active=True,
+            validated_data["room"] = Room.objects.filter(active=True,
                         participants__ph_num=validated_data['msg_from']).filter(
-                        participants__ph_num=validated_data['msg_to'])
+                        participants__ph_num=validated_data['msg_to'])[0]
 
             # Create Group Message Instance
             instance = self.Meta.model.objects.create(**validated_data)
@@ -216,4 +221,4 @@ class RoomMessageSerializer(serializers.ModelSerializer):
                                 status=status.HTTP_404_NOT_FOUND)
 
         # returning json instance of the created message
-        return GroupMessageSerializer(instance).data
+        return RoomMessageSerializer(instance).data

@@ -1,9 +1,9 @@
 # imports
-from chat.serializers import GroupSerializer
+from ..serializers import GroupSerializer, RoomSerializer
 import json
-from ..models import Group, Message, Dialogue, ActiveDetail
+from ..models import Group, Message, Dialogue, ActiveDetail, Room
 from django.contrib.auth import get_user_model as User
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_list_or_404, get_object_or_404
 # rest framework imports
 from rest_framework import status
 from rest_framework import mixins
@@ -85,11 +85,47 @@ class GenericRoomInfoViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, m
     def create(self, req, *args, **kwargs):
         pass
 
+    # TODO : Remove all reported people
     def update(self, req, *args, **kwargs):
         pass
-
+    
+    # TODO : (Get room data)
     def retrieve(self, req, *args, **kwargs):
-        pass
+        # getting back the http data
+        data = req.data
+        info = {}
+
+        # creating return matrix and error handling sender
+        msg_from = get_object_or_404(User(), ph_num=data['msg_from'])
+
+        # leaving room if present in one
+        rooms = get_list_or_404(Room, active=True,
+                        participants=msg_from)
+
+        # disabling all rooms if order is to match
+        if len(rooms) > 0:
+            data = []
+            for room in rooms:
+                data.append(RoomSerializer(room).data)
+
+            # editing our return data
+            info['info'] = "active"
+            info['message'] = "User is in a Room"
+            info['data'] = data
+
+            # entering return code
+            stat = status.HTTP_200_OK
+
+        else:
+            # editing our return data
+            info['info'] = "deactive"
+            info['message'] = "User is not in a Room"
+
+            # entering return code
+            stat = status.HTTP_404_NOT_FOUND     
+
+        # giving back json response
+        return JsonResponse(info, safe=False, status=stat)
 
     def delete(self, req, *args, **kwargs):
         pass
