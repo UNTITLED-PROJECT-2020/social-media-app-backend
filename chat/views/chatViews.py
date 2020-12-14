@@ -260,6 +260,7 @@ class GenericRoomViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixin
         return JsonResponse(serializerData, safe=False, status=stat)
 
     # deactivate the room
+    # TODO : Add logic to un-block the person 
     def update(self, req, *args, **kwargs):
         # getting back the http data
         data = req.data
