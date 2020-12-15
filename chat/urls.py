@@ -33,7 +33,7 @@ urlpatterns = [
     path('group/<str:msg_from>/<str:grp>/',
          group, name="Group Chat Room"),
 
-    path('room/<str:msg_from>/<str:room_name>/',
+    path('room/<str:msg_from>/',
          room, name="Chat Room"),
 
     # TODO : (define urls for special and info)
@@ -57,9 +57,9 @@ urlpatterns = [
          chatViews.GenericGroupViewSet.as_view(method_dict),
          name="Group Views"),
 
-        #     path('special/room/',
-        #          chatViews.GenericRoomViewSet.as_view(method_dict),
-        #          name="Room Views"),
+     path('special/room/',
+          chatViews.GenericRoomViewSet.as_view(method_dict),
+          name="Room Views"),
 
         #     path('special/special/',
         #          chatViews.GenericSpecialViewSet.as_view(method_dict),
@@ -78,9 +78,9 @@ urlpatterns = [
          infoViews.GenericGroupInfoViewSet.as_view(method_dict),
          name="Info Group Details"),
 
-        #     path('info/room/',
-        #          infoViews.GenericRoomInfoViewSet.as_view(method_dict),
-        #          name="Info Room Details"),
+    path('info/room/',
+         infoViews.GenericRoomInfoViewSet.as_view(method_dict),
+         name="Info Room Details"),
 
         #     path('info/special/',
         #          infoViews.GenericSpecialInfoViewSet.as_view(method_dict),

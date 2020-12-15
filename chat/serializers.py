@@ -2,11 +2,13 @@
 import uuid
 
 from django.http.response import JsonResponse
-from .models import Message, Dialogue, GroupMessage, Group
+from .models import Message, Dialogue, GroupMessage, Group, RoomMessage, Room
 from django.contrib.auth import get_user_model as User
 # rest framework imports
 from rest_framework import exceptions
 from rest_framework import serializers
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
 
 # creating serializers for models to work with
 
@@ -48,7 +50,7 @@ class GroupSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # error handling
         try:
-            print(validated_data)
+            # print(validated_data)
             # adding empty m2m field
             participants = validated_data.pop('participants')
             admin = validated_data.pop('admin')
@@ -69,7 +71,7 @@ class GroupSerializer(serializers.ModelSerializer):
 
             # adding m2m relation
             for user in admin:
-                print(user)
+                # print(user)
                 instance.admin.add(user)
 
                 if user not in participants:
@@ -136,3 +138,87 @@ class GroupMessageSerializer(serializers.ModelSerializer):
 
         # returning json instance of the created message
         return GroupMessageSerializer(instance).data
+
+
+# Serializing Rooms
+class RoomSerializer(serializers.ModelSerializer):
+    # adding slug fiels to get phone numbers of people in many-to-many field
+    participants = serializers.SlugRelatedField(
+        many=True,
+        slug_field="ph_num",
+        queryset=User().objects.all())
+
+    class Meta:
+        model = Room
+        fields = ['participants', 'active', 'created', 'finished']
+
+    def create(self, validated_data):
+        # error handling
+        try:
+            # adding empty m2m field
+            participants = validated_data.pop('participants')
+
+            # checking if there are only 2 people in thr room
+            if len(participants) != 2:
+                return {"info" : "error", "message": "wrong number of participants in room", "code": 400}
+
+            # getting the active rooms of the participants
+            rooms = Room.objects.filter(participants__in=participants).distinct()
+
+            # error handling if sender or receiver are in rooms already
+            if rooms.exists():
+                return {"info" : "error", "message": "participant(s) are already in room", "code": 400}
+
+            # Create Room Message Instance
+            instance = self.Meta.model.objects.create(**validated_data)
+
+            # adding m2m relation
+            for user in participants:
+                instance.participants.add(user)
+
+            data = RoomSerializer(instance).data
+
+        except exceptions.ValidationError as e:
+            errors_messages = e.error_dict if hasattr(
+                e, 'error_dict') else e.error_list
+
+            # raise serializers.ValidationError(errors_messages)
+            return JsonResponse(serializers.ValidationError(errors_messages))
+
+        # returning json instance of the created message
+        return {"info" : "sucess", "message": "room was created", "code": 200, "data": data}
+
+# serializing Room Messages
+
+
+class RoomMessageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = RoomMessage
+        fields = ['msg_from', 'msg_to', 'message',
+                  'command', 'sent_timestamp', 'room']
+
+    def create(self, validated_data):
+        # error handling
+        try:
+
+            # getting the key of the room
+            validated_data["room"] = Room.objects.filter(active=True,
+                        participants__ph_num=validated_data['msg_from']).filter(
+                        participants__ph_num=validated_data['msg_to'])[0]
+
+            # Create Group Message Instance
+            instance = self.Meta.model.objects.create(**validated_data)
+
+        except exceptions.ValidationError as e:
+            errors_messages = e.error_dict if hasattr(
+                e, 'error_dict') else e.error_list
+            raise serializers.ValidationError(errors_messages)
+
+        except Room.DoesNotExist:
+            return JsonResponse({"info": "error",
+                                 "detail": "room not found"},
+                                status=status.HTTP_404_NOT_FOUND)
+
+        # returning json instance of the created message
+        return RoomMessageSerializer(instance).data

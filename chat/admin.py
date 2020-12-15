@@ -1,6 +1,6 @@
 # imports
 from django.contrib import admin
-from .models import Message, Dialogue, ActiveDetail, GroupMessage, Group
+from .models import Message, Dialogue, ActiveDetail, GroupMessage, Group, RoomMessage, Room
 
 # adding information to messages table
 
@@ -80,6 +80,39 @@ class GroupMessageAdmin(admin.ModelAdmin):
     search_fields = ('msg_from', 'command', 'message', 'group',)
 
 
+class RoomAdmin(admin.ModelAdmin):
+    # shown in add
+    fields = ('participants', 'active', 'created', 'finished')
+
+    # shown in list view
+    list_display = ('__str__', 'active', 'created', 'finished')
+
+    # filter list
+    list_filter = ('active', 'created',)
+
+    # search parameters
+    search_fields = ('active', 'created',)
+
+    # fields that are automatically created
+    readonly_fields = ('created', 'finished')
+
+
+class RoomMessageAdmin(admin.ModelAdmin):
+    # shown in add
+    fields = ('msg_from', 'msg_to', 'message',
+              'command', 'sent_timestamp', 'room')
+
+    # shown in list view
+    list_display = ('msg_from', 'msg_to', 'message',
+                    'command', 'sent_timestamp', 'room',)
+
+    # filter list
+    list_filter = ('msg_from', 'msg_to', 'command', 'room',)
+
+    # search parameters
+    search_fields = ('msg_from', 'command', 'message', 'room',)
+
+
 
 
 
@@ -89,3 +122,5 @@ admin.site.register(Dialogue, DialogueAdmin)
 admin.site.register(ActiveDetail, ActiveDetailAdmin)
 admin.site.register(GroupMessage, GroupMessageAdmin)
 admin.site.register(Group, GroupAdmin)
+admin.site.register(RoomMessage, RoomMessageAdmin)
+admin.site.register(Room, RoomAdmin)
