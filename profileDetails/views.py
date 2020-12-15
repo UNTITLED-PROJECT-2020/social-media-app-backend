@@ -1,5 +1,5 @@
-from .models import AccountDetail
-from .serializers import AccountDetailSerializer
+from .models import AccountDetail,Ledger
+from .serializers import AccountDetailSerializer,LedgerSerializer
 #from rest_framework import viewsets
 #from django.contrib.auth.models import User
 from rest_framework import mixins,viewsets
@@ -28,3 +28,29 @@ class AccountDetailViewset(viewsets.GenericViewSet,mixins.ListModelMixin,mixins.
         serializer.save()
         return Response("Success Account Detail Created",status=status.HTTP_201_CREATED)
 
+class LedgerViewset(viewsets.GenericViewSet,mixins.ListModelMixin,mixins.CreateModelMixin,
+        mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
+    serializer_class=LedgerSerializer
+    
+    queryset= Ledger.objects.all()
+
+    def create(self,req):
+        # print(self.request)
+        # print(req)
+        if(req.user.pk==None):return Response("Check Token attached",status=status.HTTP_400_BAD_REQUEST)
+        back=['']
+        if(len(Ledger.objects.filter(User_FK=req.user.pk))==1):
+            Ledger.objects.filter(User_FK=req.user.pk)[0].delete()
+            back[0]='Deleted and '
+        serializer=LedgerSerializer(data={'User_FK':req.user.pk,'Env_FK':req.data.get('environment'),
+        'score':AccountDetail.objects.filter(Account=req.user.pk)[0].score,'ph_num':req.user.ph_num})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        back[0]+='Created'
+        return Response(back,status=status.HTTP_201_CREATED)
+
+
+    # def destroy(self,req, *args, **kwargs):
+    #     print(self)
+    #     print(req.data)
+    #     print(req.user.pk)
