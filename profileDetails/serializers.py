@@ -1,7 +1,5 @@
 from rest_framework import serializers
-from .models import AccountDetail
-from authentication.serializers import AccountSerializer
-
+from .models import AccountDetail, Ledger
 
 class AccountDetailSerializer(serializers.ModelSerializer):
     # account key commented out for now
@@ -9,3 +7,7 @@ class AccountDetailSerializer(serializers.ModelSerializer):
         model = AccountDetail
         fields = [ 'fname', 'lname', 'bio',
                   'score', 'created', 'Account']
+class LedgerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= Ledger
+        fields=['Env_FK','User_FK','score','created','ph_num']

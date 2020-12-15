@@ -8,5 +8,5 @@ from .router import router
 app_name = 'profileDetails'
 
 urlpatterns = [
-    path('',include((router.urls,'Account Details'),namespace='Account Detail')),
+    path('',include((router.urls,'/'),namespace='Account Detail')),
 ]
