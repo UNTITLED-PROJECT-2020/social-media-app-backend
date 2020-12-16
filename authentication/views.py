@@ -45,6 +45,14 @@ class GenericLoginViewSet(viewsets.GenericViewSet, mixins.RetrieveModelMixin, mi
             data["error"] = "no data provided"
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
+            
+            {
+                "email":"..."
+            }
+            {
+                "ph_num":"..."
+            }
+
 
 class GenericSignupViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
     # creating user and returning data with token

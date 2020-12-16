@@ -8,15 +8,14 @@ from rest_framework.authtoken.views import obtain_auth_token
 # connected to 'auth/'
 app_name = 'authentication'
 
-# creating router to redirect to
-authRouter = DefaultRouter()
-authRouter.register('signup/', views.GenericSignupViewSet, basename="signup")
-authRouter.register(
-    'loginData/', views.GenericLoginViewSet, basename="login")
-
 # urls
 urlpatterns = [
-    path('', include(authRouter.urls), name="GenericAuthViewSet"),
     # returning token using only (username, password)
     path('login/', obtain_auth_token),
+
+    # signing up
+    path('signup/', views.GenericSignupViewSet, name="signup"),
+
+    # returning data
+    path('loginData/', views.GenericLoginViewSet, name="login"),
 ]
