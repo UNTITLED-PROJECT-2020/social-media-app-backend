@@ -360,8 +360,6 @@ class GenericSpecialViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mi
             if room_chats.exists() : rooms = RoomSerializer(room_chats[0]).data
             else : rooms = []        
 
-            print(personal_chats, groups, rooms)
-
             # putting the data in the return dict
             info["data"] = {}
             info["data"]["personal"] = personals
