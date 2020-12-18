@@ -422,7 +422,7 @@ OR
   }
 ```
 
-- `http://127.0.0.1:8000/chat/special/room`
+- `http://127.0.0.1:8000/chat/special/special/`
 
 This an endpoint made to edit some special functions of the API
 #### POST
