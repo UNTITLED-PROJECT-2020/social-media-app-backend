@@ -349,7 +349,11 @@ class GenericSpecialViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mi
             # initializing objects and getting data
             if room_chats.exists(): 
                 personals = []
-                for i in personal_chats: convert(personals, DialogueSerializer, i)
+                for j in range(len(personal_chats)): 
+                    i = personal_chats[j]
+                    convert(personals, DialogueSerializer, i)
+                    personals[j]["sender"] = i.sender.ph_num
+                    personals[j]["receiver"] = i.receiver.ph_num
             else : personals = []
 
             if room_chats.exists(): 
@@ -359,8 +363,6 @@ class GenericSpecialViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mi
 
             if room_chats.exists() : rooms = RoomSerializer(room_chats[0]).data
             else : rooms = []        
-
-            print(personal_chats, groups, rooms)
 
             # putting the data in the return dict
             info["data"] = {}
