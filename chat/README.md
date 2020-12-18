@@ -422,6 +422,97 @@ OR
   }
 ```
 
+- `http://127.0.0.1:8000/chat/special/room`
+
+This an endpoint made to edit some special functions of the API
+#### POST
+
+This link if for getting all the information of all the 
+connected dialogues, groups, rooms, only the `msg_from`
+field is needed.
+
+If any dialogue/group/room doesnot exixt the an 
+empty array is sent
+
+```py
+request:
+  {
+  	"msg_from": "9797979797"
+  }
+
+response:
+  {
+      "data": {
+          "personal": [
+              {
+                  "sender": 7,
+                  "receiver": 8,
+                  "last_received_receiver": "2020-11-25T15:48:10.532634Z",
+                  "last_seen_receiver": "2020-11-25T15:48:33.764092Z"
+              },
+              {
+                  "sender": 7,
+                  "receiver": 10,
+                  "last_received_receiver": "2020-12-18T12:15:38.650633Z",
+                  "last_seen_receiver": "2020-12-18T12:15:38.650633Z"
+              }
+          ],
+          "group": [
+              {
+                  "name": "group",
+                  "key": "test12test",
+                  "bio": "hello hi how are you",
+                  "participants": [
+                      "9797979797",
+                      "9898989898",
+                      "9999999999",
+                      "1234567890"
+                  ],
+                  "admin": [
+                      "9797979797"
+                  ]
+              }
+          ],
+          "room": {
+              "participants": [
+                  "9797979797",
+                  "9898989898"
+              ],
+              "active": true,
+              "created": "2020-12-01T12:23:09.017662Z",
+              "finished": "2020-12-02T17:52:58.962606Z"
+          }
+      },
+      "info": "success",
+      "message": "the data has been returned"
+  }
+
+OR
+
+  {
+      "data": {
+          "personal": [],
+          "group": [],
+          "room": []
+      },
+      "info": "success",
+      "message": "the data has been returned"
+  }
+
+OR
+
+  {
+      "info": "error",
+      "message": "some error occured at endpoint"
+  }
+
+OR
+
+  {
+      "detail": "Not found."
+  }
+```
+
 ======================================================================================================
 
 ### ***Retreving/Updating Chat information***

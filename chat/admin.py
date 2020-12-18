@@ -10,6 +10,9 @@ class DialogueAdmin(admin.ModelAdmin):
     fields = ('sender', 'receiver', 'last_received_receiver',
               'last_seen_receiver',)
 
+    # non-edit
+    readonly_fields = ('last_received_receiver', 'last_seen_receiver')
+
     # shown in list view
     list_display = ('sender', 'receiver',
                     'last_received_receiver', 'last_seen_receiver',)
@@ -101,6 +104,9 @@ class RoomMessageAdmin(admin.ModelAdmin):
     # shown in add
     fields = ('msg_from', 'msg_to', 'message',
               'command', 'sent_timestamp', 'room')
+
+    # non-edit
+    readonly_fields = ('sent_timestamp', 'room')
 
     # shown in list view
     list_display = ('msg_from', 'msg_to', 'message',

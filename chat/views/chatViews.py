@@ -1,5 +1,5 @@
 # imports
-from ..serializers import GroupSerializer, RoomSerializer
+from ..serializers import DialogueSerializer, GroupSerializer, RoomSerializer
 import json
 import datetime
 from ..models import Group, Message, Dialogue, ActiveDetail, Room
@@ -322,7 +322,78 @@ class GenericRoomViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixin
 class GenericSpecialViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
     # create different types of chat and render index
 
-    def create(self, req, *args, **kwargs):
-        data = req.data
-        info = {}
+    def list(self, req, *args, **kwargs):
         pass
+
+    # return all information
+    def create(self, req, *args, **kwargs):
+
+        # getting the http data
+        data = req.data
+
+        # create return dictionaly
+        info = {}
+
+        # creating return matrix and error handling sender and receiver
+        msg_from = get_object_or_404(User(), ph_num=data.pop('msg_from'))
+
+        try:
+            # getting RAW data
+            personal_chats = Dialogue.objects.filter(sender=msg_from)
+            group_chats = Group.objects.filter(participants=msg_from)
+            room_chats = Room.objects.filter(participants=msg_from, active=True)
+            
+            # serializing the data in loops
+            convert = lambda book, func, obj : book.append(func(obj).data)
+
+            # initializing objects and getting data
+            if room_chats.exists(): 
+                personals = []
+                for i in personal_chats: convert(personals, DialogueSerializer, i)
+            else : personals = []
+
+            if room_chats.exists(): 
+                groups = []
+                for i in group_chats: convert(groups, GroupSerializer, i)
+            else : groups = []
+
+            if room_chats.exists() : rooms = RoomSerializer(room_chats[0]).data
+            else : rooms = []        
+
+            print(personal_chats, groups, rooms)
+
+            # putting the data in the return dict
+            info["data"] = {}
+            info["data"]["personal"] = personals
+            info["data"]["group"] = groups
+            info["data"]["room"] = rooms
+
+            # add to info dictionary
+            info["info"] = "success"
+            info["message"] = "the data has been returned"
+
+            # entering return code
+            stat = status.HTTP_302_FOUND    
+
+        except:
+            print("serializer error occured in 'create of special viewset'")
+
+            # add to info dictionary
+            info['message'] = "some error occured at endpoint"
+            info['info'] = "error"
+
+            # entering return code
+            stat = status.HTTP_400_BAD_REQUEST
+        
+        # giving back json response
+        return JsonResponse(info, safe=False, status=stat)
+    
+    def update(self, req, *args, **kwargs):
+        pass
+
+    def retrieve(self, req, *args, **kwargs):
+        pass
+
+    def delete(self, req, *args, **kwargs):
+        pass
+                   
