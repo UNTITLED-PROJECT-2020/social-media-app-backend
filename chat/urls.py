@@ -61,9 +61,9 @@ urlpatterns = [
           chatViews.GenericRoomViewSet.as_view(method_dict),
           name="Room Views"),
 
-        #     path('special/special/',
-        #          chatViews.GenericSpecialViewSet.as_view(method_dict),
-        #          name="Special Views"),
+     path('special/special/',
+          chatViews.GenericSpecialViewSet.as_view(method_dict),
+          name="Special Views"),
 
 
     ##################################################
@@ -82,9 +82,9 @@ urlpatterns = [
          infoViews.GenericRoomInfoViewSet.as_view(method_dict),
          name="Info Room Details"),
 
-        #     path('info/special/',
-        #          infoViews.GenericSpecialInfoViewSet.as_view(method_dict),
-        #          name="Info Special Details"),
+    path('info/special/',
+         infoViews.GenericSpecialInfoViewSet.as_view(method_dict),
+         name="Info Special Details"),
 
     path('info/active/',
          infoViews.GenericActiveInfoViewSet.as_view(method_dict),
