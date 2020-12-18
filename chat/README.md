@@ -445,16 +445,10 @@ response:
       "data": {
           "personal": [
               {
-                  "sender": 7,
-                  "receiver": 8,
+                  "sender": "9797979797",
+                  "receiver": "9898989898",
                   "last_received_receiver": "2020-11-25T15:48:10.532634Z",
                   "last_seen_receiver": "2020-11-25T15:48:33.764092Z"
-              },
-              {
-                  "sender": 7,
-                  "receiver": 10,
-                  "last_received_receiver": "2020-12-18T12:15:38.650633Z",
-                  "last_seen_receiver": "2020-12-18T12:15:38.650633Z"
               }
           ],
           "group": [
