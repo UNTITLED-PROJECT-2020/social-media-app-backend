@@ -1,10 +1,10 @@
 # imports
-from chat.serializers import GroupSerializer
+from ..serializers import GroupSerializer, RoomSerializer
 import json
 import datetime
-from ..models import Group, Message, Dialogue, ActiveDetail
+from ..models import Group, Message, Dialogue, ActiveDetail, Room
 from django.contrib.auth import get_user_model as User
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_list_or_404, get_object_or_404
 # rest framework imports
 from rest_framework import status
 from rest_framework import mixins
@@ -23,23 +23,28 @@ class GenericPersonalViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, m
     def list(self, req, *args, **kwargs):
         pass
 
+    # create a new personal chat
     def create(self, req, *args, **kwargs):
 
+        # getting the http data
         data = req.data
 
+        # creating return matrix and error handling sender and receiver
         info = {}
         msg_from = get_object_or_404(User(), ph_num=data['msg_from'])
         msg_to = get_object_or_404(User(), ph_num=data['msg_to'])
 
-        # generate a dailogue to send message
+        # generate 2 dailogue to send messages
         info["msg_from"], from_created = Dialogue.objects.get_or_create(
             sender=msg_from, receiver=msg_to,)
 
         info["msg_to"], to_created = Dialogue.objects.get_or_create(
             sender=msg_to, receiver=msg_from,)
 
+        # printing the created outputs
         print(from_created, to_created)
 
+        # editing our return data
         if from_created and to_created:
             info['info'] = 'created'
         else:
@@ -48,8 +53,10 @@ class GenericPersonalViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, m
         info["msg_from"] = info["msg_from"].sender.ph_num
         info["msg_to"] = info["msg_to"].sender.ph_num
 
+        # entering return code
         stat = status.HTTP_302_FOUND
-
+        
+        # giving back json response
         return JsonResponse(info, safe=False, status=stat)
 
     def update(self, req, *args, **kwargs):
@@ -58,10 +65,13 @@ class GenericPersonalViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, m
     def retrieve(self, req, *args, **kwargs):
         pass
 
+    # delete existing dialogue between 2 people 
     def delete(self, req, *args, **kwargs):
 
+        # getting back the http data
         data = req.data
 
+        # creating return matrix and error handling sender and receiver
         info = {}
         msg_from = get_object_or_404(User(), ph_num=data['msg_from'])
         msg_to = get_object_or_404(User(), ph_num=data['msg_to'])
@@ -72,12 +82,14 @@ class GenericPersonalViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, m
         info["msg_to"] = Dialogue.objects.get(
             sender=msg_to, receiver=msg_from).delete()
 
-        
+        # editing our return data
         info['info'] = "deleted"
         info['message'] = "Chat Deleted"
 
+        # entering return code
         stat = status.HTTP_202_ACCEPTED 
 
+        # giving back json response
         return JsonResponse(info, safe=False, status=stat)
 
 class GenericGroupViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
@@ -200,45 +212,117 @@ class GenericGroupViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixi
 
     def delete(self, req, *args, **kwargs):
         pass
+
 class GenericRoomViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
     # create different types of chat and render index
 
+    serializer_class = RoomSerializer
+    queryset = User().objects.all()
+
+    def list(self, req, *args, **kwargs):
+        pass
+
+    # create a new personal chat
     def create(self, req, *args, **kwargs):
 
+        # getting the http data
         data = req.data
 
-        # # get active details
-        # # TODO : (Create Room Chat)
-        # # data = Dialogue.objects.get(sender=msg_from, receiver=msg_to)
-        # return JsonResponse(data, safe=False)
+        # creating return matrix and error handling sender and receiver
+        msg_from = get_object_or_404(User(), ph_num=data.pop('msg_from'))
+        msg_to = get_object_or_404(User(), ph_num=data.pop('msg_to'))
+
+        data["participants"] = [msg_from.ph_num, msg_to.ph_num]
+
+        # saving serilizer data
+        serializer = self.serializer_class(data=data)
+        if serializer.is_valid():
+            print("111")
+            instance = serializer.save()
+            if instance['code'] == 400:
+                return JsonResponse(instance, 
+                safe=False, status=instance.pop("code"))
+
+            # getting the data saved by the serializer
+            serializerData = instance["data"]
+            # serializerData["participants"] = [msg_from, msg_to]
+
+            # entering return code
+            stat = status.HTTP_302_FOUND
+        else:
+            print("serializer error occured in 'create of room viewset'")
+            print(serializer.errors)
+
+            # entering return code
+            stat = status.HTTP_400_BAD_REQUEST
+        
+        # giving back json response
+        return JsonResponse(serializerData, safe=False, status=stat)
+
+    # deactivate the room
+    # TODO : Add logic to un-block the person 
+    def update(self, req, *args, **kwargs):
+        # getting back the http data
+        data = req.data
+
+        # creating return matrix and error handling sender
+        info = {}
+        msg_from = get_object_or_404(User(), ph_num=data['msg_from'])
+
+        # leaving room if present in one
+        rooms = get_list_or_404(Room, active=True,
+                        participants=msg_from)
+
+        # editing our return data
+        info['info'] = "deactivated"
+        info['message'] = "No Room is active anymore"
+
+        # disabling all rooms if order is to match
+        if len(rooms) > 0:
+            for room in rooms:
+                room.active = False
+                room.save()
+
+        # entering return code
+        stat = status.HTTP_200_OK
+
+        # giving back json response
+        return JsonResponse(info, safe=False, status=stat)
     
+    def retrieve(self, req, *args, **kwargs):
+        pass
+
+    # delete existing room between 2 people
+    def delete(self, req, *args, **kwargs):
+        # getting back the http data
+        data = req.data
+
+        # creating return matrix and error handling sender
+        info = {}
+        msg_from = get_object_or_404(User(), ph_num=data['msg_from'])
+
+        # leaving room if present in one
+        room = get_list_or_404(Room, active=True,
+                        participants=msg_from)
+
+        # deleting room
+        if len(room) > 0:
+            room[0].delete()
+
+        # editing our return data
+        info['info'] = "deleted"
+        info['message'] = "Room Deleted"
+
+        # entering return code
+        stat = status.HTTP_200_OK
+
+        # giving back json response
+        return JsonResponse(info, safe=False, status=stat)
 
 class GenericSpecialViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
     # create different types of chat and render index
 
     def create(self, req, *args, **kwargs):
-
         data = req.data
-
         info = {}
-        msg_from = get_object_or_404(User(), ph_num=data['msg_from'])
-        msg_to = get_object_or_404(User(), ph_num=data['msg_to'])
-
-        # generate a dailogue to send message
-        info["msg_from"], from_created = Dialogue.objects.get_or_create(
-            sender=msg_from, receiver=msg_to)
-        info["msg_to"], to_created = Dialogue.objects.get_or_create(
-            sender=msg_to, receiver=msg_from)
-
-        if from_created and to_created:
-            info['info'] = 'created'
-        else:
-            info['info'] = 'returned'
-
-        info["msg_from"] = info["msg_from"].sender.ph_num
-        info["msg_to"] = info["msg_to"].sender.ph_num
-
-        # info["msg_from"]
-        print(info)
-
-        return JsonResponse(info, safe=False)
+        pass

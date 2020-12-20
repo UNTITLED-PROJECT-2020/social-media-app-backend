@@ -18,17 +18,16 @@ def personal(request, msg_from, msg_to):
     })
 
 
-def group(request, msg_from, msg_to):
+def group(request, msg_from, grp):
     return render(request, 'group.html', {
         'msg_from': msg_from,
-        'msg_to': msg_to,
+        'grp': grp,
     })
 
 
-def room(request, msg_from, msg_to):
+def room(request, msg_from):
     return render(request, 'room.html', {
-        'msg_from': msg_from,
-        'msg_to': msg_to,
+        'msg_from': msg_from
     })
 
 

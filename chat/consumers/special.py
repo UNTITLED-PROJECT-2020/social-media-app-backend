@@ -2,7 +2,7 @@
 import json
 from django.contrib.auth import get_user_model
 from ..models import Message
-from ..serializers import MessageSerializer
+from ..serializers import MessageSerializer, RoomMessageSerializer
 # rest framework
 from ..serializers import MessageSerializer, GroupMessageSerializer
 # channels
@@ -230,6 +230,58 @@ class ChatSpecialConsumer(WebsocketConsumer):
         # last amount of data to be sent back
         data = {
             'command': "fetch_grp_msgs",
+            'messages': json.dumps(serializerData[-(length - iters*10):]),
+            'all': True
+        }
+
+        # Send message to WebSocket
+        self.send(text_data=json.dumps(data))
+
+    # fetch room messages
+    def fetch_room_msgs(self, event):
+        # print("In the special 'fetch_grp_msgs' of", self.room_group_name)
+        # print(event)
+
+        user = Account.objects.get(ph_num=event['msg_to'])
+        room_msgs = user.room_set.all()[0].message.filter(msg_to=event['msg_to'])
+
+        serializerData = []
+
+        for grp_msg in room_msgs:
+            msg = RoomMessageSerializer(grp_msg).data
+
+            # editing data
+            msg.pop('room')
+            msg['msg_from'] = "room"
+
+            serializerData.append(msg)
+        pass
+
+        # # sending back data in chunks
+
+        # getting the length and iterations of the serializerData array
+        length = len(serializerData)
+        iters = round(length/10)
+
+        # checking if the length of array is a multiple of 10
+        if (len == iters*10):
+            iters -= 1
+
+        # looping over 10 messages and sending
+        for i in range(iters):
+            # data to be sent back
+            data = {
+                'command': "fetch_room_msgs",
+                'messages': json.dumps(serializerData[(i*10): (i+1)*10]),
+                'all': False
+            }
+
+            # Send message to WebSocket
+            self.send(text_data=json.dumps(data))
+
+        # last amount of data to be sent back
+        data = {
+            'command': "fetch_room_msgs",
             'messages': json.dumps(serializerData[-(length - iters*10):]),
             'all': True
         }

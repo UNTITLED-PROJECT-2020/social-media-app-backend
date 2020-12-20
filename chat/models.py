@@ -1,4 +1,5 @@
 # imports
+from datetime import datetime, timedelta
 from django.db import models
 from django.conf import settings
 # rest framework imports
@@ -6,7 +7,19 @@ from rest_framework.authtoken.models import Token
 
 # Create your models here.
 
+# ActiveDetail model for details about the activity of people
+
+
+class ActiveDetail(models.Model):
+    active = models.BooleanField(default=True)
+    last_active = models.DateTimeField(null=True, blank=True)
+    account = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+        related_name='activeDetail', verbose_name='user account', default=None)
+
 # Dialogue model for a conversation between 2 people
+
+
 class Dialogue(models.Model):  # dialogue model
     sender = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='sender', default=None)
@@ -47,15 +60,6 @@ class Message(models.Model):    # message model
         ordering = ('msg_to', '-sent_timestamp',)
 
 
-# ActiveDetail model for details about the activity of people
-class ActiveDetail(models.Model):
-    active = models.BooleanField(default=True)
-    last_active = models.DateTimeField(null=True, blank=True)
-    account = models.OneToOneField(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-        related_name='activeDetail', verbose_name='user account', default=None)
-
-
 # Dialogue model for a conversation between multiple people
 class Group(models.Model):    # Group model
     name = models.CharField(
@@ -86,3 +90,40 @@ class GroupMessage(models.Model):    # Group Message model
     group = models.ForeignKey(
         Group, on_delete=models.CASCADE, related_name='message',
         verbose_name='group key', blank=True, null=True)
+
+
+# Room model for a conversation between random connected people
+class Room(models.Model):  # room model
+    participants = models.ManyToManyField(settings.AUTH_USER_MODEL,
+                                          verbose_name='room participants', default=None, max_length=2)
+    active = models.BooleanField(default=True)
+    created = models.DateTimeField(auto_now_add=True)
+    finished = models.DateTimeField(default=datetime.now() + timedelta(days=1))
+
+    def __str__(self):
+        part1, part2 = self.participants.all()[0], self.participants.all()[1]
+        return "{}-{}".format(part1.ph_num, part2.ph_num)
+
+    class Meta:
+        ordering = ('active', '-created',)
+
+
+# Message model for each message inside a Dialogue
+class RoomMessage(models.Model):    # message model
+    msg_from = models.CharField(
+        max_length=10, verbose_name='Message From', blank=True, null=True)
+    msg_to = models.CharField(
+        max_length=10, verbose_name='Message To', blank=True, null=True)
+    message = models.CharField(max_length=1200)
+    command = models.CharField(max_length=20, default='')
+    sent_timestamp = models.DateTimeField(
+        null=True, blank=True, verbose_name='sent timestamp')
+    room = models.ForeignKey(
+        Room, on_delete=models.CASCADE, related_name='message',
+        verbose_name='room key', default=None)
+
+    def __str__(self):
+        return self.msg_from
+
+    class Meta:
+        ordering = ('msg_to', 'msg_to', '-sent_timestamp',)

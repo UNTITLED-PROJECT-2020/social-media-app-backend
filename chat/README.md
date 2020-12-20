@@ -77,7 +77,8 @@ response:
       "info": "returned"
   }
   
-      OR
+OR
+
 response:
   {
       "detail": "Not found."
@@ -118,6 +119,7 @@ response:
   }
 
       OR
+
 response:
   {
       "detail": "Not found."
@@ -291,8 +293,8 @@ is atuomatically promoted to admin.
 if participants reach 0, then the group is automatically 
 deleted with all the messages linked to it are also erased.
 
-request:
 ```py
+request:
   {
   	"command" : "leave",
   	"key": "1E0C652D78",
@@ -307,8 +309,118 @@ response:
 ```
 
 - `http://127.0.0.1:8000/chat/special/room`
+<!--TODO : (Implement)-->
+On this endpoint we can create/delete/update a room for 2 or more people
+for any to users to use room chats, they need to be in a room.
 
-<--TODO : (Implement)-->
+Every single conversation has 2 people connected to each other.
+This conversation is only supposed to be valid for 24 hours.
+After that 3 cases may occur : 
+
+If one of the user might block the other one, this means
+that the room will exist in the table but will be deactivated.
+
+If both users agree to each other the room will be deleted and
+the user will be conneted in a personal chat
+
+If none of the users connect, then this room is simply deleted
+so that these people can match again.
+
+If the contact you were searching for was not found then a
+`"info": "error"` 400 BAD REQUEST response is sent back 
+
+#### POST
+
+Sending the below POST request creates a room if the
+phone number of the admin is not present in the participants
+it is automatically added, but this method is not recommended.
+
+The only data to be sent is the `msg_from` and `msg_to` field.
+Which will be provided by the matching system.
+
+```py
+request:
+  {
+  	"msg_from": "1234567890",
+  	"msg_to": "999999999"
+  }
+
+response:
+  {
+      "participants": [
+          "9999999999",
+          "1234567890"
+      ],
+      "active": true,
+      "created": "2020-12-14T13:22:21.725733Z",
+      "finished": "2020-12-15T18:49:18.480269Z"
+  }
+
+  OR
+
+  {
+      "info": "error",
+      "message": "participant(s) are already in room"
+  }
+
+  OR
+
+  {
+      "detail": "Not found."
+  }
+```
+
+#### PUT
+
+This link if for deactivating an active room, only the `msg_from`
+field is needed and the room of that user is deactivated and
+a new room between the same 2 people cannot be created
+
+```py
+request:
+  {
+  	"msg_from": "9999999999"
+  }
+
+response:
+  {
+      "info": "deactivated",
+      "message": "No Room is active anymore"
+  }
+
+OR
+
+  {
+      "detail": "Not found."
+  }
+```
+
+#### DELETE
+
+This link if for deleting an active room, only the `msg_from`
+field is needed and the room of that user is deleted and
+a new room between the same 2 people can be created later.
+
+This doesnot work if you have deactivated a room.
+
+```py
+request:
+  {
+  	"msg_from": "9999999999"
+  }
+
+response:
+  {
+      "info": "deleted",
+      "message": "Room Deleted"
+  }
+
+OR
+
+  {
+      "detail": "Not found."
+  }
+```
 
 ======================================================================================================
 
@@ -478,7 +590,37 @@ response:
 
 - `http://127.0.0.1:8000/chat/info/room` 
 
-<--TODO : (Implement)-->
+### PATCH
+
+```py
+request:
+{
+	"msg_from": "9999999999"
+}
+
+response:
+{
+    "info": "active",
+    "message": "User is in a Room",
+    "data": [
+        {
+            "participants": [
+                "9999999999",
+                "1234567890"
+            ],
+            "active": true,
+            "created": "2020-12-14T13:38:47.139590Z",
+            "finished": "2020-12-15T18:49:18.480269Z"
+        }
+    ]
+}
+
+OR
+
+{
+    "detail": "Not found."
+}
+```
 
 ======================================================================================================
 

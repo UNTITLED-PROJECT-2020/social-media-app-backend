@@ -19,7 +19,7 @@ websocket_urlpatterns = [
             ChatGroupConsumer),
 
     # chat room
-    re_path(r'ws/chat/room/(?P<room_name>\w+)/',
+    re_path(r'ws/chat/room/(?P<msg_from>\w+)/',
             ChatRoomConsumer),
 
     # special cases
