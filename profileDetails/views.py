@@ -6,6 +6,7 @@ from rest_framework import mixins,viewsets
 #from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
+from chat.models import Dialogue
 
 # Create your views here.
 class AccountDetailViewset(viewsets.GenericViewSet,mixins.ListModelMixin,mixins.CreateModelMixin,
@@ -38,19 +39,19 @@ class LedgerViewset(viewsets.GenericViewSet,mixins.ListModelMixin,mixins.CreateM
         # print(self.request)
         # print(req)
         if(req.user.pk==None):return Response("Check Token attached",status=status.HTTP_400_BAD_REQUEST)
-        back=['']
+        back={'status':'','users':[]}
         if(len(Ledger.objects.filter(User_FK=req.user.pk))==1):
             Ledger.objects.filter(User_FK=req.user.pk)[0].delete()
-            back[0]='Deleted and '
+            back['status']='Deleted and '
         serializer=LedgerSerializer(data={'User_FK':req.user.pk,'Env_FK':req.data.get('environment'),
         'score':AccountDetail.objects.filter(Account=req.user.pk)[0].score,'ph_num':req.user.ph_num})
         serializer.is_valid(raise_exception=True)
+        set=Ledger.objects.filter(
+            Env_FK=req.data.get('environment')).exclude(
+            User_FK__in=[instance.receiver for instance in Dialogue.objects.filter(sender=req.user)])
+        
+    
+        # set.objects.filter
         serializer.save()
-        back[0]+='Created'
+        back['status']+='Created'
         return Response(back,status=status.HTTP_201_CREATED)
-
-
-    # def destroy(self,req, *args, **kwargs):
-    #     print(self)
-    #     print(req.data)
-    #     print(req.user.pk)
