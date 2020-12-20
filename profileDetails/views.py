@@ -6,7 +6,8 @@ from rest_framework import mixins,viewsets
 #from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 from rest_framework import status
-from chat.models import Dialogue
+from chat.models import Dialogue,Room
+import random
 
 # Create your views here.
 class AccountDetailViewset(viewsets.GenericViewSet,mixins.ListModelMixin,mixins.CreateModelMixin,
@@ -16,12 +17,12 @@ class AccountDetailViewset(viewsets.GenericViewSet,mixins.ListModelMixin,mixins.
 
     def create(self,req):
         if(req.user.pk==None):return Response("Check Token attached",status=status.HTTP_400_BAD_REQUEST)
-        if(len(AccountDetail.objects.filter(Account=req.user.pk))==1):return Response("Profile Already Exsists",status=status.HTTP_400_BAD_REQUEST)
-        req.data['Account']=req.user.pk #print(req.data) updating foreignkey from body to header's token
+        if(len(AccountDetail.objects.filter(account=req.user.pk))==1):return Response("Profile Already Exsists",status=status.HTTP_400_BAD_REQUEST)
+        req.data['account']=req.user #print(req.data) updating foreignkey from body to header's token
         serializer = self.serializer_class(data=req.data) #Account.objects.filter(pk=req.user.pk)  serialziing the input data
         serializer.is_valid(raise_exception=True) #raising exception for bad data
         temp = serializer.validated_data   #getting the valid data as ordered dict
-        self.Account=temp.get('Account')  #saving all instances
+        self.account=temp.get('account')  #saving all instances
         self.fname=temp.get('fname')
         self.lname=temp.get('lname')
         self.bio=temp.get('bio')
@@ -40,18 +41,34 @@ class LedgerViewset(viewsets.GenericViewSet,mixins.ListModelMixin,mixins.CreateM
         # print(req)
         if(req.user.pk==None):return Response("Check Token attached",status=status.HTTP_400_BAD_REQUEST)
         back={'status':'','users':[]}
-        if(len(Ledger.objects.filter(User_FK=req.user.pk))==1):
-            Ledger.objects.filter(User_FK=req.user.pk)[0].delete()
+        if(len(Ledger.objects.filter(account=req.user.pk))==1):
+            Ledger.objects.filter(account=req.user.pk)[0].delete()
             back['status']='Deleted and '
-        serializer=LedgerSerializer(data={'User_FK':req.user.pk,'Env_FK':req.data.get('environment'),
-        'score':AccountDetail.objects.filter(Account=req.user.pk)[0].score,'ph_num':req.user.ph_num})
+        Score=AccountDetail.objects.filter(account=req.user.pk)[0].score
+        serializer=LedgerSerializer(data={'account':req.user.pk,'env':req.data.get('environment'),
+        'score':Score,'ph_num':req.user.ph_num})
         serializer.is_valid(raise_exception=True)
         set=Ledger.objects.filter(
-            Env_FK=req.data.get('environment')).exclude(
-            User_FK__in=[instance.receiver for instance in Dialogue.objects.filter(sender=req.user)])
-        
-    
-        # set.objects.filter
-        serializer.save()
+            env=req.data.get('environment')).exclude(
+            account__in=[instance.receiver for instance in Dialogue.objects.filter(sender=req.user)])
+        UsersToBeExcluded=[]
+        for instance in Room.objects.filter(participants=req.user):
+            UsersToBeExcluded.append(instance.participants.all()[0])
+            UsersToBeExcluded.append(instance.participants.all()[0])
+        set=set.exclude(
+             account__in=UsersToBeExcluded)
+        # print(set)
+        set=set.filter(score__lte=Score)
+        set=set.exclude(score__lte=Score-15)
+        if(req.data.get('type')==1):
+            count=0
+            for item in set:
+                if(count==10):break
+                count+=1
+                back['users'].append(item.account.pk)
+        if(req.data.get('type')==0):
+            if(len(set)==0):return Response(back,status=status.HTTP_201_CREATED)
+            back['users']=[random.choice(set).account.pk]
         back['status']+='Created'
+        serializer.save()
         return Response(back,status=status.HTTP_201_CREATED)

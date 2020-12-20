@@ -2,7 +2,7 @@ from django.db import models
 from AppBackend import settings
 
 # Create your models here.
-#Accountdetail model
+#accountdetail model
 class Environments(models.Model):
     
     Name= models.CharField(max_length=20,unique=True)
