@@ -5,10 +5,30 @@
 <head>
     <meta charset="utf-8" />
     <title>Test Group</title>
+
+    <!-- BS5 tag -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" 
+    rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" 
+    crossorigin="anonymous">
+    <!-- Jquery Bundles -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 </head>
 
-<body>
-    <h1>Heloo group</h1>
+<body style="width: 97%; margin: auto;">
+    <!-- Toast Alert for update -->
+    <div class="container mt-1" style="position: relative">
+        <div class="toast d-flex align-items-center text-white bg-success border-0" 
+        style="position: absolute; top: 10%; right: 40%;" 
+        data-bs-autohide="false" role="alert" aria-live="assertive" aria-atomic="true">
+            <div id="toast-text" class="toast-body">
+                <!--  -->
+                TOAST
+            </div>
+            <button type="button" class="btn-close btn-close-white ms-auto me-2" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+
+    <h1>Group Chat</h1>
 
     <textarea id="chat-log" cols="100" rows="20"></textarea>
     <span style="display: inline-block;">
@@ -173,6 +193,126 @@
                     document.querySelector('#is-typing-log').value = (data.msg_from + " is typing...");
                 }
 
+            } else if (data['command'] == 'update') {
+                info = data["message"]
+                console.log(info);
+
+                // diffrentiating on the basis of the type of chat
+                if (info["type"] == "personal"){
+
+                    // sub-data in message
+                    if (info['command'] == "create"){
+                        
+                        // getting the toast object
+                        var txt = document.getElementById('toast-text');
+                        txt.innerHTML = "New User"
+    
+                        // selecting the pop-up Toast
+                        var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+                        var toastList = toastElList.map(function (toastEl) {
+                            return new bootstrap.Toast(toastEl)
+                        })
+
+                        // showing the pop-up Toast
+                        toastList.forEach(toast => toast.show());
+                        console.log(toastList);
+
+                    } else if (info['command'] == "delete"){
+
+                        // getting the toast object
+                        var txt = document.getElementById('toast-text');
+                        txt.innerHTML = "Dialogue Deleted"
+    
+                        // seleting the pop-up Toast
+                        var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+                        var toastList = toastElList.map(function (toastEl) {
+                            return new bootstrap.Toast(toastEl)
+                        })
+
+                        // showing the pop-up Toast
+                        toastList.forEach(toast => toast.show());
+                        console.log(toastList);
+                    }
+                } else if (info["type"] == "group"){
+
+                    // getting the toast object
+                    var txt = document.getElementById('toast-text');
+
+                    // sub-data in message
+                    if (info['command'] == "create"){
+
+                        // setting toast text
+                        txt.innerHTML = "Group Created"
+
+                    } else if (info['command'] == "add"){
+
+                        // setting toast text
+                        txt.innerHTML = "Added to Group"
+
+                    } else if (info['command'] == "remove"){
+
+                        // setting toast text
+                        txt.innerHTML = "Removed from Group"
+
+                    } else if (info['command'] == "promote"){
+
+                        // setting toast text
+                        txt.innerHTML = "Promoted in Group"
+
+                    } else if (info['command'] == "leave"){
+
+                        // setting toast text
+                        txt.innerHTML = "Left Group"
+
+                    } else {
+                        pass
+                    }
+
+                    // seleting the pop-up Toast
+                    var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+                    var toastList = toastElList.map(function (toastEl) {
+                        return new bootstrap.Toast(toastEl)
+                    })
+
+                    // showing the pop-up Toast
+                    toastList.forEach(toast => toast.show());
+                    console.log(toastList);
+
+                } else if (info["type"] == "room"){
+
+                // getting the toast object
+                    var txt = document.getElementById('toast-text');
+
+                    // sub-data in message
+                    if (info['command'] == "create"){
+                        // setting toast text
+                        txt.innerHTML = "Room Created"
+
+                    } else if (info['command'] == "deactive") {
+                        // setting toast text
+                        txt.innerHTML = "Room Deactivated"
+
+                    } else if (info['command'] == "delete") {
+                        // setting toast text
+                        txt.innerHTML = "Room Deleted"
+                    }
+
+                    // seleting the pop-up Toast
+                    var toastElList = [].slice.call(document.querySelectorAll('.toast'))
+                    var toastList = toastElList.map(function (toastEl) {
+                        return new bootstrap.Toast(toastEl)
+                    })
+
+                    // showing the pop-up Toast
+                    toastList.forEach(toast => toast.show());
+
+                } else {
+                    console.warn("Unknown Notification received :");
+                    console.warn(info);
+
+                }
+
+
             } else if (data['command'] == 'error'){
                 if (data['type'] == 'fetch_msgs'){
                     console.error(data['message']);
@@ -290,6 +430,11 @@
             }));
         }
     </script>
+    
+    <!-- BS5 javascript bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" 
+    integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" 
+    crossorigin="anonymous"></script>
 </body>
 
 </html>

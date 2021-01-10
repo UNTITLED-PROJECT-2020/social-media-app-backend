@@ -83,6 +83,18 @@ response:
   {
       "detail": "Not found."
   }
+
+response [in chatReceiveSocket.onmessage()]:
+{
+    'message': {
+                  "type": "personal", 
+                  "command": "create"
+                },
+    'command': 'update',                             // command to be executed
+    'msg_from': '9898989898',                        // group key of the person sending the msg
+    'msg_to': '9797979797',                          // phone num of the person receiving the msg
+    'sent_timestamp': '2020-11-21 16:32:18.789'      // datetime at which the 'update' command was sent
+}
 ```
 
 
@@ -124,10 +136,22 @@ response:
   {
       "detail": "Not found."
   }
+
+response [in chatReceiveSocket.onmessage()]:
+{
+    'message': {
+                  "type": "personal", 
+                  "command": "delete"
+                },
+    'command': 'update',                             // command to be executed
+    'msg_from': '9898989898',                        // group key of the person sending the msg
+    'msg_to': '9797979797',                          // phone num of the person receiving the msg
+    'sent_timestamp': '2020-11-21 16:32:18.789'      // datetime at which the 'update' command was sent
+}
 ```
 
 
-- `http://127.0.0.1:8000/chat/special/group`
+- `http://127.0.0.1:8000/chat/special/group/`
 
 On this endpoint we can create/delete/update a group for 2 or more people
 for any to users to use group chats, they need to be in a group.
@@ -150,6 +174,9 @@ string we can access and send messages to that group.
 
 Also, the fiels like name and bio are limited to 30 and 80
 charaters respectively.
+
+Make sure to send the `ph_num` of the creator of the group in the
+`admin` field to make sure the correct notification reaches everyone
 
 ```py
 request:
@@ -180,11 +207,25 @@ response:
     },
     "info": "error"
 }
+
+response [in chatReceiveSocket.onmessage()]:
+{
+    'message': {
+                  "type": "group", 
+                  "command": "create", 
+                  "msg_from": "9999999999", 
+                  "msg_to": ""
+                },
+    'command': 'update',                             // command to be executed
+    'msg_from': 'test12test',                        // group key of the person sending the msg
+    'msg_to': '99999999',                            // phone num of the person receiving the msg
+    'sent_timestamp': '2020-11-21 16:32:18.789'      // datetime at which the 'update' command was sent
+}
 ```
 
 
 
-#### PATCH
+#### PUT
 
 Sending the below PATCH requests updated an existing group
 these methods are used for `adding/removing/promting` participants,
@@ -228,6 +269,20 @@ response:
       "info": "error",
       "message": "Group Full"
   }
+
+response [in chatReceiveSocket.onmessage()]:
+{
+    'message': {
+                  "type": "group", 
+                  "command": "add", 
+                  "msg_from": "9999999999", 
+                  "msg_to": "9797979797"
+                },
+    'command': 'update',                             // command to be executed
+    'msg_from': 'test12test',                        // group key of the person sending the msg
+    'msg_to': '99999999',                            // phone num of the person receiving the msg
+    'sent_timestamp': '2020-11-21 16:32:18.789'      // datetime at which the 'update' command was sent
+}
 ```
 
 *REMOVE*
@@ -256,6 +311,20 @@ response:
       "info": "error",
       "message": "Wrong Operation"
   }
+
+response [in chatReceiveSocket.onmessage()]:
+{
+    'message': {
+                  "type": "group", 
+                  "command": "remove", 
+                  "msg_from": "9999999999", 
+                  "msg_to": "9797979797"
+                },
+    'command': 'update',                             // command to be executed
+    'msg_from': 'test12test',                        // group key of the person sending the msg
+    'msg_to': '99999999',                            // phone num of the person receiving the msg
+    'sent_timestamp': '2020-11-21 16:32:18.789'      // datetime at which the 'update' command was sent
+}
 ```
 
 *PROMOTE*
@@ -279,6 +348,20 @@ response:
       "info": "promoted",
       "message": "The user has been promoted sucessfully"
   }
+
+response [in chatReceiveSocket.onmessage()]:
+{
+    'message': {
+                  "type": "group", 
+                  "command": "promote", 
+                  "msg_from": "9999999999", 
+                  "msg_to": "9797979797"
+                },
+    'command': 'update',                             // command to be executed
+    'msg_from': 'test12test',                        // group key of the person sending the msg
+    'msg_to': '99999999',                            // phone num of the person receiving the msg
+    'sent_timestamp': '2020-11-21 16:32:18.789'      // datetime at which the 'update' command was sent
+}
 ```
 
 *LEAVE*
@@ -306,10 +389,23 @@ response:
       "info": "left",
       "message": "the user has left the group"
   }
+
+response [in chatReceiveSocket.onmessage()]:
+{
+    'message': {
+                  "type": "group", 
+                  "command": "leave", 
+                  "msg_from": "9999999999", 
+                  "msg_to": ""
+                },
+    'command': 'update',                             // command to be executed
+    'msg_from': 'test12test',                        // group key of the person sending the msg
+    'msg_to': '99999999',                            // phone num of the person receiving the msg
+    'sent_timestamp': '2020-11-21 16:32:18.789'      // datetime at which the 'update' command was sent
+}
 ```
 
 - `http://127.0.0.1:8000/chat/special/room`
-<!--TODO : (Implement)-->
 On this endpoint we can create/delete/update a room for 2 or more people
 for any to users to use room chats, they need to be in a room.
 
@@ -368,6 +464,20 @@ response:
   {
       "detail": "Not found."
   }
+
+response [in chatReceiveSocket.onmessage()]:
+{
+    'message': {
+                  "type": "room", 
+                  "command": "create",
+                  "msg_from": "9898989898",
+                  "msg_to": "9797979797",
+                },
+    'command': 'update',                             // command to be executed
+    'msg_from': '9898989898',                        // group key of the person sending the msg
+    'msg_to': '9797979797',                          // phone num of the person receiving the msg
+    'sent_timestamp': '2020-11-21 16:32:18.789'      // datetime at which the 'update' command was sent
+}
 ```
 
 #### PUT
@@ -393,6 +503,20 @@ OR
   {
       "detail": "Not found."
   }
+
+response [in chatReceiveSocket.onmessage()]:
+{
+    'message': {
+                  "type": "room", 
+                  "command": "deactive",
+                  "msg_from": "9898989898",
+                  "msg_to": "",
+                },
+    'command': 'update',                             // command to be executed
+    'msg_from': '9898989898',                        // group key of the person sending the msg
+    'msg_to': '',                          // phone num of the person receiving the msg
+    'sent_timestamp': '2020-11-21 16:32:18.789'      // datetime at which the 'update' command was sent
+}
 ```
 
 #### DELETE
@@ -420,6 +544,20 @@ OR
   {
       "detail": "Not found."
   }
+
+response [in chatReceiveSocket.onmessage()]:
+{
+    'message': {
+                  "type": "room", 
+                  "command": "delete",
+                  "msg_from": "9898989898",
+                  "msg_to": "",
+                },
+    'command': 'update',                             // command to be executed
+    'msg_from': '9898989898',                        // group key of the person sending the msg
+    'msg_to': '',                          // phone num of the person receiving the msg
+    'sent_timestamp': '2020-11-21 16:32:18.789'      // datetime at which the 'update' command was sent
+}
 ```
 
 - `http://127.0.0.1:8000/chat/special/special/`
@@ -445,16 +583,10 @@ response:
       "data": {
           "personal": [
               {
-                  "sender": 7,
-                  "receiver": 8,
+                  "sender": "9797979797",
+                  "receiver": "9898989898",
                   "last_received_receiver": "2020-11-25T15:48:10.532634Z",
                   "last_seen_receiver": "2020-11-25T15:48:33.764092Z"
-              },
-              {
-                  "sender": 7,
-                  "receiver": 10,
-                  "last_received_receiver": "2020-12-18T12:15:38.650633Z",
-                  "last_seen_receiver": "2020-12-18T12:15:38.650633Z"
               }
           ],
           "group": [

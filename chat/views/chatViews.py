@@ -1,8 +1,9 @@
 # imports
 from ..serializers import DialogueSerializer, GroupSerializer, RoomSerializer
 import json
-import datetime
+from datetime import datetime as dt
 from ..models import Group, Message, Dialogue, ActiveDetail, Room
+from profileDetails.models import Ledger
 from django.contrib.auth import get_user_model as User
 from django.shortcuts import get_list_or_404, get_object_or_404
 # rest framework imports
@@ -10,6 +11,9 @@ from rest_framework import status
 from rest_framework import mixins
 from rest_framework import viewsets
 from django.http import JsonResponse
+# channels import
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 # Create your views here.
 
@@ -41,17 +45,33 @@ class GenericPersonalViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, m
         info["msg_to"], to_created = Dialogue.objects.get_or_create(
             sender=msg_to, receiver=msg_from,)
 
+        # updating return info
+        info["msg_from"] = info["msg_from"].sender.ph_num
+        info["msg_to"] = info["msg_to"].sender.ph_num
+
         # printing the created outputs
         print(from_created, to_created)
 
         # editing our return data
         if from_created and to_created:
             info['info'] = 'created'
+
+            # sending update to the receving user
+            layer = get_channel_layer()
+
+            async_to_sync(layer.group_send)(
+                info["msg_to"],
+                {
+                    "message": {"type": "personal", "command": "create"},
+                    "type": "update",
+                    "msg_from": info["msg_from"],
+                    "msg_to": info["msg_to"],
+                    "sent_timestamp": dt.now().strftime("%Y-%m-%dT%H:%M:%S.%f%z"),
+                }
+            )
+
         else:
             info['info'] = 'returned'
-
-        info["msg_from"] = info["msg_from"].sender.ph_num
-        info["msg_to"] = info["msg_to"].sender.ph_num
 
         # entering return code
         stat = status.HTTP_302_FOUND
@@ -75,16 +95,30 @@ class GenericPersonalViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, m
         info = {}
         msg_from = get_object_or_404(User(), ph_num=data['msg_from'])
         msg_to = get_object_or_404(User(), ph_num=data['msg_to'])
+        sender_dialogue = get_object_or_404(Dialogue, sender=msg_from, receiver=msg_to)
+        receiver_dialogue = get_object_or_404(Dialogue, sender=msg_to, receiver=msg_from)
 
         # generate a dailogue to send message
-        info["msg_from"] = Dialogue.objects.get(
-            sender=msg_from, receiver=msg_to).delete()
-        info["msg_to"] = Dialogue.objects.get(
-            sender=msg_to, receiver=msg_from).delete()
+        info["msg_from"] = sender_dialogue.delete()
+        info["msg_to"] = receiver_dialogue.delete()
 
         # editing our return data
         info['info'] = "deleted"
         info['message'] = "Chat Deleted"
+
+        # Sending update to the receving user
+        layer = get_channel_layer()
+
+        async_to_sync(layer.group_send)(
+            data["msg_to"],
+            {
+                "message": {"type": "personal", "command": "delete"},
+                "type": "update",
+                "msg_from": data["msg_from"],
+                "msg_to": data["msg_to"],
+                "sent_timestamp": dt.now().strftime("%Y-%m-%dT%H:%M:%S.%f%z"),
+            }
+        )
 
         # entering return code
         stat = status.HTTP_202_ACCEPTED 
@@ -113,6 +147,12 @@ class GenericGroupViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixi
             info['info'] = "created"
             stat = status.HTTP_201_CREATED
 
+            # sending 'created' notification            
+            if self.broadcast(serializerData['key'], serializerData['participants'], "create", data['admin'][0]):
+                pass
+            else:
+                print("Error occured in sending notification in `create` of 'GenericGroupViewSet'")
+
             
         else:
             print("serializer error occured in 'GenericGroupViewSet'")
@@ -140,9 +180,15 @@ class GenericGroupViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixi
             admin = True if msg_from in grp.admin.all() else False
             participant = True if msg_from in grp.participants.all() else False
 
+            # sending 'leave' notification
+            notifData = GroupSerializer(grp).data
+            if self.broadcast(notifData['key'], notifData['participants'], data['command'], data['msg_from']):
+                pass
+            else:
+                print("Error occured in sending notification in `update` of 'GenericGroupViewSet'")
+
             if admin_length == 1 and participants_length == 1 and admin and participant:
                 grp.delete()
-                # Group.objects.delete()
 
             else:
                 if participant:
@@ -157,7 +203,6 @@ class GenericGroupViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixi
             stat = status.HTTP_200_OK
 
         else :
-
             grp = get_object_or_404(Group, key=data['key'])
             msg_from = get_object_or_404(User(), ph_num=data['msg_from'])
             msg_to = get_object_or_404(User(), ph_num=data['msg_to'])
@@ -205,6 +250,13 @@ class GenericGroupViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixi
                     info['message'] = "Wrong Operation"
                     stat = status.HTTP_501_NOT_IMPLEMENTED
 
+                # sending notifications
+                notifData = GroupSerializer(grp).data
+                if self.broadcast(notifData['key'], notifData['participants'], data['command'], data['msg_from'], data['msg_to']):
+                    pass
+                else:
+                    print("Error occured in sending notification in `create` of 'GenericGroupViewSet'")
+
         return JsonResponse(info, safe=False, status=stat)
 
     def retrieve(self, req, *args, **kwargs):
@@ -212,6 +264,36 @@ class GenericGroupViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixi
 
     def delete(self, req, *args, **kwargs):
         pass
+
+    # sending notification to multiple people
+    def broadcast(self, key, participants, command, msg_from=None, msg_to=None):
+
+        # error handling the required data
+        if not participants or key is None or command is None:
+            True
+        else:
+            False
+        
+        # looping through all the prople in the group
+        for ph_num in participants:
+            
+            # getting the layer object
+            layer = get_channel_layer()
+
+            # sending update to the receving user
+            async_to_sync(layer.group_send)(
+                ph_num,
+                {
+                    "message": {"type": "group", "command": command, "msg_from": msg_from, "msg_to": msg_to},
+                    # "message": '{"type": "group", "command": "{}", "msg_from": "{}", "msg_to": "{}"}'.format(command, msg_from, msg_to),
+                    "type": "update",
+                    "msg_from": key,
+                    "msg_to": ph_num,
+                    "sent_timestamp": dt.now().strftime("%Y-%m-%dT%H:%M:%S.%f%z"),
+                }
+            )
+
+        return True
 
 class GenericRoomViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
     # create different types of chat and render index
@@ -231,6 +313,13 @@ class GenericRoomViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixin
         # creating return matrix and error handling sender and receiver
         msg_from = get_object_or_404(User(), ph_num=data.pop('msg_from'))
         msg_to = get_object_or_404(User(), ph_num=data.pop('msg_to'))
+        
+        # removing entrys from Ledger
+        try:
+            Ledger.objects.filter(account=msg_from)[0].delete()
+            Ledger.objects.filter(account=msg_to)[0].delete()
+        except:
+            print("error occured in deleting ledger in 'create' of 'GenericRoomViewSet'")
 
         data["participants"] = [msg_from.ph_num, msg_to.ph_num]
 
@@ -245,7 +334,13 @@ class GenericRoomViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixin
 
             # getting the data saved by the serializer
             serializerData = instance["data"]
-            # serializerData["participants"] = [msg_from, msg_to]
+
+            # sending 'create' notification
+            notifData = serializerData
+            if self.broadcast(notifData['participants'], command='create', msg_from=msg_from.ph_num, msg_to=msg_to.ph_num):
+                pass
+            else:
+                print("Error occured in sending notification in `update` of 'GenericRoomViewSet'")
 
             # entering return code
             stat = status.HTTP_302_FOUND
@@ -260,7 +355,6 @@ class GenericRoomViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixin
         return JsonResponse(serializerData, safe=False, status=stat)
 
     # deactivate the room
-    # TODO : Add logic to un-block the person 
     def update(self, req, *args, **kwargs):
         # getting back the http data
         data = req.data
@@ -283,6 +377,14 @@ class GenericRoomViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixin
                 room.active = False
                 room.save()
 
+            # sending 'deactive' notification
+            notifData = RoomSerializer(rooms[0]).data
+            if self.broadcast(notifData['participants'], command='deactive', msg_from=data['msg_from']):
+                pass
+            else:
+                print("Error occured in sending notification in `update` of 'GenericRoomViewSet'")
+
+
         # entering return code
         stat = status.HTTP_200_OK
 
@@ -293,6 +395,7 @@ class GenericRoomViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixin
         pass
 
     # delete existing room between 2 people
+    # TODO : (creating personal chats/updating score on the basis of matching)
     def delete(self, req, *args, **kwargs):
         # getting back the http data
         data = req.data
@@ -302,12 +405,20 @@ class GenericRoomViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixin
         msg_from = get_object_or_404(User(), ph_num=data['msg_from'])
 
         # leaving room if present in one
-        room = get_list_or_404(Room, active=True,
+        rooms = get_list_or_404(Room, active=True,
                         participants=msg_from)
 
         # deleting room
-        if len(room) > 0:
-            room[0].delete()
+        if len(rooms) > 0:
+            # sending 'deactive' notification
+            notifData = RoomSerializer(rooms[0]).data
+            if self.broadcast(notifData['participants'], command='delete', msg_from=data['msg_from']):
+                pass
+            else:
+                print("Error occured in sending notification in `update` of 'GenericRoomViewSet'")
+
+            rooms[0].delete()
+
 
         # editing our return data
         info['info'] = "deleted"
@@ -318,6 +429,35 @@ class GenericRoomViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixin
 
         # giving back json response
         return JsonResponse(info, safe=False, status=stat)
+
+    # sending notification to multiple people
+    def broadcast(self, participants, command, msg_from=None, msg_to=None):
+
+        # error handling the required data
+        if not participants or command is None:
+            True
+        else:
+            False
+        
+        # looping through all the prople in the group
+        for ph_num in participants:
+            
+            # getting the layer object
+            layer = get_channel_layer()
+
+            # sending update to the receving user
+            async_to_sync(layer.group_send)(
+                ph_num,
+                {
+                    "message": {"type": "room", "command": command, "msg_from": msg_from, "msg_to": msg_to},
+                    "type": "update",
+                    "msg_from": msg_from,
+                    "msg_to": ph_num,
+                    "sent_timestamp": dt.now().strftime("%Y-%m-%dT%H:%M:%S.%f%z"),
+                }
+            )
+
+        return True
 
 class GenericSpecialViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
     # create different types of chat and render index
@@ -398,4 +538,4 @@ class GenericSpecialViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mi
 
     def delete(self, req, *args, **kwargs):
         pass
-                   
+                 

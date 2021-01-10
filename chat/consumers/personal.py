@@ -113,7 +113,7 @@ class ChatPersonalConsumer(WebsocketConsumer):
         sent_timestamp = event['sent_timestamp']
 
         # striping datetime from 'sent_timestamp'
-        d = datetime.datetime.strptime(sent_timestamp, "%Y-%m-%d %H:%M:%S.%f")
+        d = datetime.datetime.strptime(sent_timestamp, "%Y-%m-%dT%H:%M:%S.%f%z")
 
         # querying the dialogue object that the data belongs to
         dialogue = Dialogue.objects.filter(
@@ -135,7 +135,7 @@ class ChatPersonalConsumer(WebsocketConsumer):
         # print(json.dumps(event, indent=2))
 
         # striping datetime from 'sent_timestamp'
-        d = datetime.datetime.strptime(sent_timestamp, "%Y-%m-%d %H:%M:%S.%f")
+        d = datetime.datetime.strptime(sent_timestamp, "%Y-%m-%dT%H:%M:%S.%f%z")
 
         # querying the dialogue object that the data belongs to
         dialogue = Dialogue.objects.filter(
@@ -174,6 +174,14 @@ class ChatPersonalConsumer(WebsocketConsumer):
             self.error(event)
             pass
 
+        pass
+
+    # send updates to user
+    def update(self, event):
+        print("in update of 'personal'")
+        
+        # TODO : (save update message) 
+                
         pass
 
     # send an error reply
