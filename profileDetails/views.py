@@ -8,6 +8,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from chat.models import Dialogue,Room
 import random
+from authentication.models import Account
+from chat.views.chatViews import GenericRoomViewSet
+from rest_framework.decorators import api_view
 
 # Create your views here.
 class AccountDetailViewset(viewsets.GenericViewSet,mixins.ListModelMixin,mixins.CreateModelMixin,
@@ -40,7 +43,7 @@ class LedgerViewset(viewsets.GenericViewSet,mixins.ListModelMixin,mixins.CreateM
         # print(self.request)
         # print(req)
         if(req.user.pk==None):return Response("Check Token attached",status=status.HTTP_400_BAD_REQUEST)
-        back={'status':'','users':[]}
+        back={'status':'','recommended':[],"random":[]}
         if(len(Ledger.objects.filter(account=req.user.pk))==1):
             Ledger.objects.filter(account=req.user.pk)[0].delete()
             back['status']='Deleted and '
@@ -60,15 +63,22 @@ class LedgerViewset(viewsets.GenericViewSet,mixins.ListModelMixin,mixins.CreateM
         # print(set)
         set=set.filter(score__lte=Score)
         set=set.exclude(score__lte=Score-15)
-        if(req.data.get('type')==1):
-            count=0
-            for item in set:
-                if(count==10):break
-                count+=1
-                back['users'].append(item.account.pk)
-        if(req.data.get('type')==0):
-            if(len(set)==0):return Response(back,status=status.HTTP_201_CREATED)
-            back['users']=[random.choice(set).account.pk]
+        count=0
+        for item in set:
+            if(count==10):break
+            count+=1
+            back['recommended'].append(item.account.pk)
+        if(len(set)==0):return Response(back,status=status.HTTP_201_CREATED)
+        back['random']=[random.choice(set).account.pk]
         back['status']+='Created'
         serializer.save()
         return Response(back,status=status.HTTP_201_CREATED)
+
+def scoreAdjust(ph_num,change):
+    AccountDetail.objects.filter(account=Account.objects.filter(ph_num=ph_num)[0].pk)[0].score+=change
+    # @api_view(('POST',))
+    # def match(req):
+    #     data=req.data
+    #     Ledger.objects.filter(account=Account.objects.filter(ph_num=req.data.get('msg_from'))[0].pk)[0].delete()
+    #     Ledger.objects.filter(account=Account.objects.filter(ph_num=req.data.get('msg_to'))[0].pk)[0].delete()
+    #     GenericRoomViewSet.create(req)
