@@ -75,7 +75,10 @@ class LedgerViewset(viewsets.GenericViewSet,mixins.ListModelMixin,mixins.CreateM
         return Response(back,status=status.HTTP_201_CREATED)
 
 def scoreAdjust(ph_num,change):
-    AccountDetail.objects.filter(account=Account.objects.filter(ph_num=ph_num)[0].pk)[0].score+=change
+
+    user=AccountDetail.objects.filter(account=Account.objects.filter(ph_num=ph_num)[0].pk)[0]
+    user.score+=change
+    user.save()
     # @api_view(('POST',))
     # def match(req):
     #     data=req.data
