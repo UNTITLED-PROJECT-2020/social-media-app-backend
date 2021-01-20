@@ -85,10 +85,10 @@ class GroupMessageAdmin(admin.ModelAdmin):
 
 class RoomAdmin(admin.ModelAdmin):
     # shown in add
-    fields = ('participants', 'active', 'created', 'finished')
+    fields = ('participants', 'active', 'created', 'finished', "response")
 
     # shown in list view
-    list_display = ('__str__', 'active', 'created', 'finished')
+    list_display = ('__str__', 'active', 'created', 'finished', 'response')
 
     # filter list
     list_filter = ('active', 'created',)

@@ -9,7 +9,7 @@ from rest_framework import status
 from chat.models import Dialogue,Room
 import random
 from authentication.models import Account
-from chat.views.chatViews import GenericRoomViewSet
+# from chat.views.chatViews import GenericRoomViewSet
 from rest_framework.decorators import api_view
 
 # Create your views here.
