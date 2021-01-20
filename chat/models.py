@@ -93,7 +93,7 @@ class Room(models.Model):  # room model
     active = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)
     finished = models.DateTimeField(default=datetime.now() + timedelta(days=1))
-    response = models.StringField(default="", max_length=2)
+    response = models.CharField(default="", max_length=1)
 
     def __str__(self):
         try:

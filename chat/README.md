@@ -527,10 +527,18 @@ a new room between the same 2 people can be created later.
 
 This doesnot work if you have deactivated a room.
 
+This is done when either the 1-day time period of the room has
+ended or the user has quit the room, the `response` field here 
+specifies the response score given by the user to the other 
+person in the room
+
+<!-- TODO : (update response) -->
+
 ```py
 request:
   {
-  	"msg_from": "9999999999"
+  	"msg_from": "9999999999",
+    "response": "1"
   }
 
 response:

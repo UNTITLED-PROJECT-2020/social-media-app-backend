@@ -4,6 +4,7 @@ import json
 from datetime import datetime as dt
 from ..models import Group, Message, Dialogue, ActiveDetail, Room
 from profileDetails.models import Ledger
+from profileDetails.views import scoreAdjust
 from django.contrib.auth import get_user_model as User
 from django.shortcuts import get_list_or_404, get_object_or_404
 # rest framework imports
@@ -367,6 +368,15 @@ class GenericRoomViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixin
         rooms = get_list_or_404(Room, active=True,
                         participants=msg_from)
 
+        notifData = RoomSerializer(rooms[0]).data
+
+        # getting `msg_to` oject
+        temp = notifData['participants']
+        temp.remove(msg_from.ph_num)
+        msg_to = get_object_or_404(User(), ph_num=temp[0])
+
+        # TODO : (grading the other user as -1)
+
         # editing our return data
         info['info'] = "deactivated"
         info['message'] = "No Room is active anymore"
@@ -378,7 +388,6 @@ class GenericRoomViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixin
                 room.save()
 
             # sending 'deactive' notification
-            notifData = RoomSerializer(rooms[0]).data
             if self.broadcast(notifData['participants'], command='deactive', msg_from=data['msg_from']):
                 pass
             else:
@@ -404,28 +413,97 @@ class GenericRoomViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixin
         info = {}
         msg_from = get_object_or_404(User(), ph_num=data['msg_from'])
 
-        # leaving room if present in one
+        # getting all rooms of the user
         rooms = get_list_or_404(Room, active=True,
                         participants=msg_from)
 
-        # deleting room
-        if len(rooms) > 0:
-            # sending 'deactive' notification
-            notifData = RoomSerializer(rooms[0]).data
-            if self.broadcast(notifData['participants'], command='delete', msg_from=data['msg_from']):
-                pass
+        # checking if room is present in `rooms`
+        if len(rooms) > 0 and rooms[0]['active']:
+
+            # get active room
+            room = rooms[0]
+            grade = data['response']
+            notifData = RoomSerializer(room).data
+
+            # getting `msg_to` oject
+            temp = notifData['participants']
+            temp.remove(msg_from.ph_num)
+            msg_to = get_object_or_404(User(), ph_num=temp[0])
+
+            # error handling for the `grade` field in data
+            if grade is not "1" or grade is not "0":
+                print("wrong grade received in response in 'delete' of 'GenericRoomViewSet'")
+
             else:
-                print("Error occured in sending notification in `update` of 'GenericRoomViewSet'")
+                # grading the other user
+                self.grade(msg_to.ph_num, grade)
 
-            rooms[0].delete()
+                # response present, deleting room and creating personal chat as per data
+                if len(room.response) == 1:
+                    # initializing created as False
+                    created = False
 
+                    # creating new room on 11 response
+                    if grade is "1" and room.response is "1":
+                        # returns `True` for new personal chat 
+                        created = self.personalInit(msg_from, msg_to)
+                    else:
+                        print("wrong grade received in len(1) response in 'delete' of 'GenericRoomViewSet'")
 
-        # editing our return data
-        info['info'] = "deleted"
-        info['message'] = "Room Deleted"
+                    # deleting room
+                    room.delete()
 
-        # entering return code
-        stat = status.HTTP_200_OK
+                    if created:
+                        # sending notification
+                        if self.broadcast(notifData['participants'], command='replace', msg_from=data['msg_from'], msg_to=msg_to.ph_num):
+                            pass
+                        else:
+                            print("Error occured in sending notification in `update` of 'GenericRoomViewSet' (1)")
+
+                        # editing our return data
+                        info['info'] = "replaced"
+                        info['message'] = "Room Deleted and personal chat created"
+                        info['msg_from'] = data['msg_from']
+                        info['msg_from'] = msg_to.ph_num
+
+                        # entering return code
+                        stat = status.HTTP_200_OK
+
+                    else:
+                        # sending notification
+                        if self.broadcast(notifData['participants'], command='delete', msg_from=data['msg_from']):
+                            pass
+                        else:
+                            print("Error occured in sending notification in `update` of 'GenericRoomViewSet' (2)")
+
+                        # editing our return data
+                        info['info'] = "deleted"
+                        info['message'] = "Room Deleted"
+
+                        # entering return code
+                        stat = status.HTTP_200_OK
+
+                # no response present, updating response and saving
+                elif len(room.response) == 0:
+                    # Saving the grade in response of room
+                    room.response = grade
+                    room.save()
+
+                    # sending 'grade' notification
+                    if self.broadcast(notifData['participants'], command='grade', msg_from=data['msg_from'], msg_to=msg_to.ph_num):
+                        pass
+                    else:
+                        print("Error occured in sending notification in `update` of 'GenericRoomViewSet'")
+                    
+                    # editing our return data
+                    info['info'] = "graded"
+                    info['message'] = "Response noted, waitning for other user"
+
+                    # entering return code
+                    stat = status.HTTP_202_ACCEPTED
+
+                else:
+                    print("wrong length of response, in 'delete' of 'GenericRoomViewSet'")
 
         # giving back json response
         return JsonResponse(info, safe=False, status=stat)
@@ -458,6 +536,27 @@ class GenericRoomViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixin
             )
 
         return True
+
+    # defining new personal chat
+    def personalInit(self, msg_from, msg_to):
+        # generate 2 dailogue to send messages
+        info["msg_from"], from_created = Dialogue.objects.get_or_create(
+            sender=msg_from, receiver=msg_to,)
+
+        info["msg_to"], to_created = Dialogue.objects.get_or_create(
+            sender=msg_to, receiver=msg_from,)
+
+        # editing our return data
+        if from_created and to_created:
+            return True
+        else:
+            return False
+
+    # grading the other person
+    def grade(self, ph_num, grade):
+        # adjusting grade
+        scoreAdjust(ph_num, int(grade))
+        pass
 
 class GenericSpecialViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, mixins.RetrieveModelMixin):
     # create different types of chat and render index
