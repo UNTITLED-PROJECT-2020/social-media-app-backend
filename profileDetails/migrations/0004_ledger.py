@@ -20,12 +20,12 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('score', models.IntegerField()),
                 ('created', models.DateTimeField(auto_now_add=True)),
-                ('Env_FK', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='environments.environments')),
-                ('User_FK', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('env', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='environments.environments')),
+                ('account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
             options={
-                'ordering': ('Env_FK', 'score', 'created'),
-                'unique_together': {('Env_FK', 'User_FK')},
+                'ordering': ('env', 'score', 'created'),
+                'unique_together': {('env', 'account')},
             },
         ),
     ]

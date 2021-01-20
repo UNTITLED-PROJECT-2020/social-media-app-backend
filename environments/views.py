@@ -16,11 +16,11 @@ class EnvironmentsViewset(viewsets.GenericViewSet,mixins.ListModelMixin,mixins.C
         mixins.UpdateModelMixin, mixins.RetrieveModelMixin, mixins.DestroyModelMixin):
     serializer_class=EnvironmentsSerializer
     queryset= Environments.objects.all()
-    def list(self, req):
-        queryset = Environments.objects.all()
-        serializer = EnvironmentsSerializer(queryset, many=True)
-        #print(Response(serializer.data))
-        return Response(serializer.data)
+    # def list(self, req):
+    #     queryset = Environments.objects.all()
+    #     serializer = EnvironmentsSerializer(queryset, many=True)
+    #     #print(Response(serializer.data))
+    #     return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
         queryset = Environments.objects.all()

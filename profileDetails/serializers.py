@@ -6,8 +6,8 @@ class AccountDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = AccountDetail
         fields = [ 'fname', 'lname', 'bio',
-                  'score', 'created', 'Account']
+                  'score', 'created', 'account']
 class LedgerSerializer(serializers.ModelSerializer):
     class Meta:
         model= Ledger
-        fields=['Env_FK','User_FK','score','created','ph_num']
+        fields=['env','account','score','created','ph_num']
