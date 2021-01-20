@@ -36,10 +36,8 @@ urlpatterns = [
     path('room/<str:msg_from>/',
          room, name="Chat Room"),
 
-    # TODO : (define urls for special and info)
-
-        #     path('special/',
-        #          special, name="Chat Room"),
+     path('special/',
+          special, name="Chat Room"),
 
     path('info/',
          info, name="Chat Room"),

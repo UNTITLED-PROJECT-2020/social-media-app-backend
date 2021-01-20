@@ -293,6 +293,16 @@ class ChatSpecialConsumer(WebsocketConsumer):
     def delete_msg(self, event):
         pass
 
+    # send updates to user
+    def update(self, event):
+        print("in update of 'special'")
+        event['command'] = event.pop('type')
+        print(event)
+
+        
+        self.send(text_data=json.dumps(event))
+        pass
+
     # send an error reply
     def error(self, event):
         self.send(text_data=json.dumps({

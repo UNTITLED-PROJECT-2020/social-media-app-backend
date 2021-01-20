@@ -8,8 +8,6 @@ from rest_framework.authtoken.models import Token
 # Create your models here.
 
 # ActiveDetail model for details about the activity of people
-
-
 class ActiveDetail(models.Model):
     active = models.BooleanField(default=True)
     last_active = models.DateTimeField(null=True, blank=True)
@@ -17,9 +15,8 @@ class ActiveDetail(models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
         related_name='activeDetail', verbose_name='user account', default=None)
 
+
 # Dialogue model for a conversation between 2 people
-
-
 class Dialogue(models.Model):  # dialogue model
     sender = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='sender', default=None)
@@ -36,7 +33,6 @@ class Dialogue(models.Model):  # dialogue model
 
         ordering = ('receiver', '-last_seen_receiver',
                     '-last_received_receiver',)
-
 
 # Message model for each message inside a Dialogue
 class Message(models.Model):    # message model
@@ -74,8 +70,6 @@ class Group(models.Model):    # Group model
                                    verbose_name='group admins', default=None)
 
 # Message model for each message inside a Dialogue
-
-
 class GroupMessage(models.Model):    # Group Message model
     msg_from = models.CharField(
         max_length=10, verbose_name='Message From', default=None)
@@ -99,14 +93,17 @@ class Room(models.Model):  # room model
     active = models.BooleanField(default=True)
     created = models.DateTimeField(auto_now_add=True)
     finished = models.DateTimeField(default=datetime.now() + timedelta(days=1))
+    response = models.CharField(default="", max_length=1)
 
     def __str__(self):
-        part1, part2 = self.participants.all()[0], self.participants.all()[1]
-        return "{}-{}".format(part1.ph_num, part2.ph_num)
+        try:
+            part1, part2 = self.participants.all()[0], self.participants.all()[1]
+            return "{}-{}".format(part1.ph_num, part2.ph_num)
+        except:
+            return "null"
 
     class Meta:
         ordering = ('active', '-created',)
-
 
 # Message model for each message inside a Dialogue
 class RoomMessage(models.Model):    # message model

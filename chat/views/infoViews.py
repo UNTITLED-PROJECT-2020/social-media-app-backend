@@ -85,11 +85,10 @@ class GenericRoomInfoViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin, m
     def create(self, req, *args, **kwargs):
         pass
 
-    # TODO : Remove all reported people
+    # TODO : Remove reported/unblock people
     def update(self, req, *args, **kwargs):
         pass
     
-    # TODO : (Get room data)
     def retrieve(self, req, *args, **kwargs):
         # getting back the http data
         data = req.data
